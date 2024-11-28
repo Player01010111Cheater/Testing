@@ -222,7 +222,7 @@ local autoacceptt2rade = trader:AddToggle({
   Name = "Start auto offer and accept(only epic and legendary fruits)" ,
   Default = false,
   Callback = function (Shownormtraifdorno)
-    while wait(2) do
+    while wait(3) do
       if Shownormtraifdorno == true then
         for _, invitetrad in pairs(game.Players:GetChildren()) do
           if invitetrad.Name == player.Name then
@@ -308,16 +308,7 @@ local autoacceptt2rade = trader:AddToggle({
                                       if l.Name == whatothergiveforu then
                                           game:GetService("ReplicatedStorage").Chest.Remotes.Functions.TradeFunction:InvokeServer("Ready")
                                       else
-                                        wait(5)
-                                        if l.Name == whatothergiveforu then
-                                          game:GetService("ReplicatedStorage").Chest.Remotes.Functions.TradeFunction:InvokeServer("Ready")
-                                      else
-                                        for _, denytrade in pairs(game.Players:GetChildren()) do
-                                          if denytrade.Name == player.Name then
-                                            game:GetService("ReplicatedStorage").Chest.Remotes.Functions.TradeRequester:InvokeServer("Deny",{["TargetName"] = denytrade.Name})
-                                          end
-                                        end
-                                      end
+                                        
                                       end
                                   end
                               end
@@ -329,8 +320,6 @@ local autoacceptt2rade = trader:AddToggle({
               end
           end
       else
-        whatothergiveforu = "None"
-        whatugive = "None"
       end
     end
 end})
