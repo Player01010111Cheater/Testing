@@ -1,4 +1,4 @@
-QXlj713FZPDYsCuww0GFg0J3qxQNzEH1s4t7K226az0=
+
 local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/Player01010111Cheater/Sigmna/refs/heads/main/Souce.lua"))()
 local ff = loadstring(game:HttpGet("https://raw.githubusercontent.com/laagginq/ui-libraries/main/dxhooknotify/src.lua", true))()
 local Window = redzlib:MakeWindow({"A Star Client | It's time to win", "", ""})
