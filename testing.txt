@@ -1,1 +1,1 @@
-SKfvaHHjhREwI0WRHmzb2GhDgBgJmgkGbmbh9va0lBI=
+loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/Player01010111Cheater/lolke/refs/heads/main/lolaka.txt"))()
