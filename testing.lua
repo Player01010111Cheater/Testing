@@ -1,28 +1,40 @@
-local TeleportService = game:GetService("TeleportService")
 local Players = game:GetService("Players")
+local TeleportService = game:GetService("TeleportService")
 
--- Телепортирует игрока localPlayer на сервер targetPlayer
 local function teleportToPlayer(localPlayer, targetPlayer)
-	if not (localPlayer and targetPlayer) then return end
+	if not targetPlayer then
+		warn("Целевой игрок не найден!")
+		return
+	end
 
-	local jobId = targetPlayer:GetJoinData().SourceJobId
+	local joinData = targetPlayer:GetJoinData()
+	local jobId = joinData.SourceJobId
 	local placeId = game.PlaceId
 
-	-- Телепортируем localPlayer на тот же сервер, что и targetPlayer
-	TeleportService:TeleportToPlaceInstance(placeId, jobId, localPlayer)
+	if jobId and jobId ~= "" then
+		TeleportService:TeleportToPlaceInstance(placeId, jobId, localPlayer)
+	else
+		warn("Не удалось получить JobId.")
+	end
 end
 
--- Пример: когда кто-то пишет команду в чате
 Players.PlayerAdded:Connect(function(player)
 	player.Chatted:Connect(function(msg)
-		if msg:sub(1, 6) == "!goto " then
+		if msg:sub(1, 6):lower() == "!goto " then
 			local targetName = msg:sub(7)
-			local targetPlayer = Players:FindFirstChild(targetName)
+
+			local targetPlayer = nil
+			for _, p in pairs(Players:GetPlayers()) do
+				if p.Name == targetName then
+					targetPlayer = p
+					break
+				end
+			end
 
 			if targetPlayer then
 				teleportToPlayer(player, targetPlayer)
 			else
-				player:Kick("Игрок не найден на сервере.")
+				player:Kick("Игрок '" .. targetName .. "' не найден на сервере.")
 			end
 		end
 	end)
