@@ -10,6 +10,7 @@ local function teleportToPlayer(localPlayer, targetPlayer)
 	local joinData = targetPlayer:GetJoinData()
 	local jobId = joinData.SourceJobId
 	local placeId = game.PlaceId
+	print(jobId)
 
 	if jobId and jobId ~= "" then
 		TeleportService:TeleportToPlaceInstance(placeId, jobId, localPlayer)
