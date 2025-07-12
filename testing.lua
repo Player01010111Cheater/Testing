@@ -1,16 +1,19 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local MovePetEvent = ReplicatedStorage.GameEvents:WaitForChild("ActivePetService") -- Замените на имя вашего RemoteEvent
+local ReplicatedStorage = game:GetService("ReplicatedStorage").GameEvents:WaitForChild("ActivePetService")
 
--- Сохраняем оригинальную функцию FireServer
-local oldFireServer = MovePetEvent.FireServer
-
--- Переопределяем FireServer для отладки
-MovePetEvent.FireServer = function(self, ...)
-    local args = {...} -- Захватываем все аргументы
-    print("Перехват FireServer. Аргументы:", args) -- Выводим аргументы в консоль
-    for i, arg in ipairs(args) do
-        print("Аргумент", i, ":", arg, "Тип:", typeof(arg))
+-- Функция для перехвата OnClientEvent для конкретного RemoteEvent
+local function interceptRemoteEvent(remote)
+    if remote and remote:IsA("RemoteEvent") then
+        print("Перехват OnClientEvent для RemoteEvent:", remote.Name)
+        remote.OnClientEvent:Connect(function(...)
+            local args = {...}
+            print("Получены данные от сервера через", remote.Name, ":", args)
+            for i, arg in ipairs(args) do
+                print("Аргумент", i, ":", tostring(arg), "Тип:", typeof(arg))
+            end
+        end)
+    else
+        warn("Ошибка: Объект", remote and remote.Name or "nil", "не является RemoteEvent")
     end
-    -- Вызываем оригинальную функцию, чтобы не сломать игру
-    return oldFireServer(self, ...)
 end
+
+interceptRemoteEvent(ReplicatedStorage)
