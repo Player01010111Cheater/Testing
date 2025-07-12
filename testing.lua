@@ -1,19 +1,19 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage").GameEvents:WaitForChild("ActivePetService")
+local targetRemote = game:GetService("ReplicatedStorage").GameEvents:WaitForChild("ActivePetService")
 
--- Функция для перехвата OnClientEvent для конкретного RemoteEvent
-local function interceptRemoteEvent(remote)
-    if remote and remote:IsA("RemoteEvent") then
-        print("Перехват OnClientEvent для RemoteEvent:", remote.Name)
-        remote.OnClientEvent:Connect(function(...)
+-- Хук namecall'ов
+local oldNamecall
+oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+    if not checkcaller() then
+        local method = getnamecallmethod()
+        
+        if method == "FireServer" and self == targetRemote then
+            warn("[MyRemoteEvent] FireServer вызван!")
             local args = {...}
-            print("Получены данные от сервера через", remote.Name, ":", args)
-            for i, arg in ipairs(args) do
-                print("Аргумент", i, ":", tostring(arg), "Тип:", typeof(arg))
+            for i, v in ipairs(args) do
+                print("Аргумент " .. i .. ":", v)
             end
-        end)
-    else
-        warn("Ошибка: Объект", remote and remote.Name or "nil", "не является RemoteEvent")
+        end
     end
-end
 
-interceptRemoteEvent(ReplicatedStorage)
+    return oldNamecall(self, ...)
+end)
