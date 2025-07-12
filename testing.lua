@@ -1,22 +1,16 @@
-local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local MovePetEvent = ReplicatedStorage.GameEvents:WaitForChild("ActivePetService") -- Замените на имя вашего RemoteEvent
 
-local Window = WindUI:CreateWindow({
-    Title = "Cub",
-    Icon = "gem",
-    Size = UDim2.fromOffset(580, 350),
-    Transparent = true,
-    Theme = "Dark",
-    User = {
-        Enabled = true,
-        Anonymous = false,
-        Callback = function()
-            -- Тут логика
-        end,
-    },
+-- Сохраняем оригинальную функцию FireServer
+local oldFireServer = MovePetEvent.FireServer
 
-})
-
-
-local searchbar = Window.Searchbar 
---                        | Special name     | Icon     | Callback                         | Order
-Window:CreateTopbarButton("MyCustomButton1", "bird",    function() searchbar:Open() end,  990)
+-- Переопределяем FireServer для отладки
+MovePetEvent.FireServer = function(self, ...)
+    local args = {...} -- Захватываем все аргументы
+    print("Перехват FireServer. Аргументы:", args) -- Выводим аргументы в консоль
+    for i, arg in ipairs(args) do
+        print("Аргумент", i, ":", arg, "Тип:", typeof(arg))
+    end
+    -- Вызываем оригинальную функцию, чтобы не сломать игру
+    return oldFireServer(self, ...)
+end
