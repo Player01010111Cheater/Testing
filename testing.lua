@@ -28,3 +28,4 @@ oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
 end)
 
 warn("✅ Хук установлен")
+
