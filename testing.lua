@@ -5,7 +5,7 @@ ScreenGui.ResetOnSpawn = false
 ScreenGui.DisplayOrder = 10
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0.21, 0, 0.12, 0)
+MainFrame.Size = UDim2.new(0.25, 0, 0.12, 0)
 MainFrame.Position = UDim2.new(0, 7, 1, -75)
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 MainFrame.BorderSizePixel = 0
@@ -16,8 +16,9 @@ UICorner.CornerRadius = UDim.new(1, 0)
 UICorner.Parent = MainFrame
 
 local TimerLabel = Instance.new("TextLabel")
-TimerLabel.Size = UDim2.new(0.6, 0, 0.5, 0)
-TimerLabel.Position = UDim2.new(0.14, 0, 0, 5)
+TimerLabel.Name = "TimerLabel"
+TimerLabel.Size = UDim2.new(0.27, 0, 0.5, 0)
+TimerLabel.Position = UDim2.new(0.2, 0, 0, 8)
 TimerLabel.BackgroundTransparency = 1
 TimerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 TimerLabel.TextSize = 17
@@ -26,20 +27,21 @@ TimerLabel.Font = Enum.Font.GothamBold
 TimerLabel.Text = "00:00"
 TimerLabel.Parent = MainFrame
 
-local FPSLabel = Instance.new("TextLabel")
-FPSLabel.Size = UDim2.new(0.4, 0, 0.5, 0)
-FPSLabel.Position = UDim2.new(0.64, 0, 0, 5)
-FPSLabel.BackgroundTransparency = 1
-FPSLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-FPSLabel.TextSize = 17
-FPSLabel.TextScaled = false
-FPSLabel.Font = Enum.Font.GothamBold
-FPSLabel.Text = "60"
-FPSLabel.Parent = MainFrame
+local FpsLabel = Instance.new("TextLabel")
+FpsLabel.Name = "FpsLabel"
+FpsLabel.Size = UDim2.new(0.4, 0, 0.5, 0)
+FpsLabel.Position = UDim2.new(0.66, 0, 0, 9)
+FpsLabel.BackgroundTransparency = 1
+FpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+FpsLabel.TextSize = 17
+FpsLabel.TextScaled = false
+FpsLabel.Font = Enum.Font.GothamBold
+FpsLabel.Text = "60"
+FpsLabel.Parent = MainFrame
 
 local TimerIcon = Instance.new("ImageLabel")
 TimerIcon.Size = UDim2.new(0.1, 0, 0.5, 0)
-TimerIcon.Position = UDim2.new(0.08, 0, 0, 5)
+TimerIcon.Position = UDim2.new(0.071, 0, 0, 10)
 TimerIcon.BackgroundTransparency = 1
 TimerIcon.Image = "rbxassetid://10709752630"
 TimerIcon.Parent = MainFrame
@@ -50,9 +52,9 @@ TimerIconAspect.Parent = TimerIcon
 
 local FPSIcon = Instance.new("ImageLabel")
 FPSIcon.Size = UDim2.new(0.1, 0, 0, 10)
-FPSIcon.Position = UDim2.new(0.57, 0, 0, 10)
+FPSIcon.Position = UDim2.new(0.57, 0, 0, 13)
 FPSIcon.BackgroundTransparency = 1
-FPSIcon.Image = "rbxassetid://15269177520" -- Обновленный ID
+FPSIcon.Image = "rbxassetid://15269177520"
 FPSIcon.Parent = MainFrame
 
 local FPSIconAspect = Instance.new("UIAspectRatioConstraint")
@@ -67,28 +69,30 @@ Divider.BorderSizePixel = 0
 Divider.Parent = MainFrame
 
 local function getTime()
-    -- Здесь ваша функция получения времени
     local totalSeconds = math.floor(tick() % 3600)
     local minutes = math.floor(totalSeconds / 60)
     local seconds = totalSeconds % 60
     return string.format("%02d:%02d", minutes, seconds)
 end
 
-local frameTimes = {}
-local maxFrames = 20
+-- Исправленный FPS-счетчик
+local lastUpdate = tick()
+local frameCount = 0
+local fps = 60
 
-game:GetService("RunService").RenderStepped:Connect(function(deltaTime)
+game:GetService("RunService").Heartbeat:Connect(function()
+    -- Обновление таймера
     TimerLabel.Text = getTime()
     
-    -- Усреднение FPS
-    table.insert(frameTimes, deltaTime)
-    if #frameTimes > maxFrames then
-        table.remove(frameTimes, 1)
+    -- Подсчет FPS
+    frameCount = frameCount + 1
+    local now = tick()
+    local elapsed = now - lastUpdate
+    
+    if elapsed >= 0.5 then -- Обновляем FPS каждые 0.5 секунды
+        fps = math.floor(frameCount / elapsed + 0.5)
+        frameCount = 0
+        lastUpdate = now
+        FpsLabel.Text = tostring(fps)
     end
-    local averageDelta = 0
-    for _, dt in ipairs(frameTypes) do
-        averageDelta = averageDelta + dt
-    end
-    averageDelta = averageDelta / #frameTimes
-    FPSLabel.Text = tostring(math.floor(1 / averageDelta))
 end)
