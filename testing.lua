@@ -15,7 +15,7 @@ UICorner.CornerRadius = UDim.new(0, 8)
 UICorner.Parent = MainFrame
 
 local TimerLabel = Instance.new("TextLabel")
-TimerLabel.Size = UDim2.new(0.5, 0, 0.5, 0)
+TimerLabel.Size = UDim2.new(0.45, 0, 0.5, 0)
 TimerLabel.Position = UDim2.new(0.1, 0, 0, 5)
 TimerLabel.BackgroundTransparency = 1
 TimerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -25,7 +25,7 @@ TimerLabel.Text = "00:00"
 TimerLabel.Parent = MainFrame
 
 local FPSLabel = Instance.new("TextLabel")
-FPSLabel.Size = UDim2.new(0.4, 0, 0.5, 0)
+FPSLabel.Size = UDim2.new(0.35, 0, 0.5, 0)
 FPSLabel.Position = UDim2.new(0.6, 0, 0, 5)
 FPSLabel.BackgroundTransparency = 1
 FPSLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -38,26 +38,54 @@ local TimerIcon = Instance.new("ImageLabel")
 TimerIcon.Size = UDim2.new(0.1, 0, 0.5, 0)
 TimerIcon.Position = UDim2.new(0, 5, 0, 5)
 TimerIcon.BackgroundTransparency = 1
-TimerIcon.Image = "rbxassetid://10709752630" -- Замените на ваш rbxassetid для иконки таймера
+TimerIcon.Image = "rbxassetid://10709752630" -- Замените на ваш rbxassetid
 TimerIcon.Parent = MainFrame
+
+local TimerIconAspect = Instance.new("UIAspectRatioConstraint")
+TimerIconAspect.AspectRatio = 1
+TimerIconAspect.Parent = TimerIcon
 
 local FPSIcon = Instance.new("ImageLabel")
 FPSIcon.Size = UDim2.new(0.1, 0, 0.5, 0)
 FPSIcon.Position = UDim2.new(0.5, 0, 0, 5)
 FPSIcon.BackgroundTransparency = 1
-FPSIcon.Image = "rbxassetid://10747382504" -- Замените на ваш rbxassetid для иконки FPS
+FPSIcon.Image = "rbxassetid://10747382504" -- Замените на ваш rbxassetid
 FPSIcon.Parent = MainFrame
+
+local FPSIconAspect = Instance.new("UIAspectRatioConstraint")
+FPSIconAspect.AspectRatio = 1
+FPSIconAspect.Parent = FPSIcon
+
+local Divider = Instance.new("Frame")
+Divider.Size = UDim2.new(0.005, 0, 0.8, 0)
+Divider.Position = UDim2.new(0.55, 0, 0.1, 0)
+Divider.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+Divider.BorderSizePixel = 0
+Divider.Parent = MainFrame
 
 local function getTime()
     -- Здесь ваша функция получения времени
-    -- Пример: возвращает время в формате MM:SS
     local totalSeconds = math.floor(tick() % 3600)
     local minutes = math.floor(totalSeconds / 60)
     local seconds = totalSeconds % 60
     return string.format("%02d:%02d", minutes, seconds)
 end
 
+local frameTimes = {}
+local maxFrames = 10 -- Количество кадров для усреднения FPS
+
 game:GetService("RunService").RenderStepped:Connect(function(deltaTime)
     TimerLabel.Text = getTime()
-    FPSLabel.Text = "FPS: " .. math.floor(1 / deltaTime)
+    
+    -- Усреднение FPS
+    table.insert(frameTimes, deltaTime)
+    if #frameTimes > maxFrames then
+        table.remove(frameTimes, 1)
+    end
+    local averageDelta = 0
+    for _, dt in ipairs(frameTimes) do
+        averageDelta = averageDelta + dt
+    end
+    averageDelta = averageDelta / #frameTimes
+    FPSLabel.Text = "FPS: " .. math.floor(1 / averageDelta)
 end)
