@@ -2,17 +2,17 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "TimerAndFPSGui"
 ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
-ScreenGui.DisplayOrder = 10 -- Уменьшен приоритет отображения
+ScreenGui.DisplayOrder = 10
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0.25, 0, 0.08, 0) -- Уменьшен размер
-MainFrame.Position = UDim2.new(0, 10, 1, -60)
+MainFrame.Size = UDim2.new(0.21, 0, 0.12, 0)
+MainFrame.Position = UDim2.new(0, 7, 1, -75)
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 MainFrame.BorderSizePixel = 0
 MainFrame.Parent = ScreenGui
 
 local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0.2, 0) -- Более круглое закругление
+UICorner.CornerRadius = UDim.new(1, 0)
 UICorner.Parent = MainFrame
 
 local TimerLabel = Instance.new("TextLabel")
@@ -20,7 +20,8 @@ TimerLabel.Size = UDim2.new(0.6, 0, 0.5, 0)
 TimerLabel.Position = UDim2.new(0.14, 0, 0, 5)
 TimerLabel.BackgroundTransparency = 1
 TimerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-TimerLabel.TextScaled = true
+TimerLabel.TextSize = 17
+TimerLabel.TextScaled = false
 TimerLabel.Font = Enum.Font.GothamBold
 TimerLabel.Text = "00:00"
 TimerLabel.Parent = MainFrame
@@ -30,7 +31,8 @@ FPSLabel.Size = UDim2.new(0.4, 0, 0.5, 0)
 FPSLabel.Position = UDim2.new(0.64, 0, 0, 5)
 FPSLabel.BackgroundTransparency = 1
 FPSLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-FPSLabel.TextScaled = true
+FPSLabel.TextSize = 17
+FPSLabel.TextScaled = false
 FPSLabel.Font = Enum.Font.GothamBold
 FPSLabel.Text = "60"
 FPSLabel.Parent = MainFrame
@@ -47,10 +49,10 @@ TimerIconAspect.AspectRatio = 1
 TimerIconAspect.Parent = TimerIcon
 
 local FPSIcon = Instance.new("ImageLabel")
-FPSIcon.Size = UDim2.new(0.1, 0, 0.5, 0)
-FPSIcon.Position = UDim2.new(0.58, 0, 0, 5)
+FPSIcon.Size = UDim2.new(0.1, 0, 0, 10)
+FPSIcon.Position = UDim2.new(0.57, 0, 0, 10)
 FPSIcon.BackgroundTransparency = 1
-FPSIcon.Image = "rbxassetid://10747382504"
+FPSIcon.Image = "rbxassetid://15269177520" -- Обновленный ID
 FPSIcon.Parent = MainFrame
 
 local FPSIconAspect = Instance.new("UIAspectRatioConstraint")
@@ -84,7 +86,7 @@ game:GetService("RunService").RenderStepped:Connect(function(deltaTime)
         table.remove(frameTimes, 1)
     end
     local averageDelta = 0
-    for _, dt in ipairs(frameTimes) do
+    for _, dt in ipairs(frameTypes) do
         averageDelta = averageDelta + dt
     end
     averageDelta = averageDelta / #frameTimes
