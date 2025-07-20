@@ -2,16 +2,17 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "TimerAndFPSGui"
 ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
+ScreenGui.DisplayOrder = 10 -- Уменьшен приоритет отображения
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0.32, 0, 0.11, 0) -- Уменьшен размер интерфейса
-MainFrame.Position = UDim2.new(0, 10, 1, -80)
+MainFrame.Size = UDim2.new(0.25, 0, 0.08, 0) -- Уменьшен размер
+MainFrame.Position = UDim2.new(0, 10, 1, -60)
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 MainFrame.BorderSizePixel = 0
 MainFrame.Parent = ScreenGui
 
 local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 8)
+UICorner.CornerRadius = UDim.new(0.2, 0) -- Более круглое закругление
 UICorner.Parent = MainFrame
 
 local TimerLabel = Instance.new("TextLabel")
@@ -19,8 +20,7 @@ TimerLabel.Size = UDim2.new(0.6, 0, 0.5, 0)
 TimerLabel.Position = UDim2.new(0.14, 0, 0, 5)
 TimerLabel.BackgroundTransparency = 1
 TimerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-TimerLabel.TextSize = 20
-TimerLabel.TextScaled = false
+TimerLabel.TextScaled = true
 TimerLabel.Font = Enum.Font.GothamBold
 TimerLabel.Text = "00:00"
 TimerLabel.Parent = MainFrame
@@ -30,15 +30,14 @@ FPSLabel.Size = UDim2.new(0.4, 0, 0.5, 0)
 FPSLabel.Position = UDim2.new(0.64, 0, 0, 5)
 FPSLabel.BackgroundTransparency = 1
 FPSLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-FPSLabel.TextSize = 20
-FPSLabel.TextScaled = false
+FPSLabel.TextScaled = true
 FPSLabel.Font = Enum.Font.GothamBold
 FPSLabel.Text = "60"
 FPSLabel.Parent = MainFrame
 
 local TimerIcon = Instance.new("ImageLabel")
 TimerIcon.Size = UDim2.new(0.1, 0, 0.5, 0)
-TimerIcon.Position = UDim2.new(0.08, 0, 0, 5) -- Ближе к тексту таймера
+TimerIcon.Position = UDim2.new(0.08, 0, 0, 5)
 TimerIcon.BackgroundTransparency = 1
 TimerIcon.Image = "rbxassetid://10709752630"
 TimerIcon.Parent = MainFrame
@@ -49,7 +48,7 @@ TimerIconAspect.Parent = TimerIcon
 
 local FPSIcon = Instance.new("ImageLabel")
 FPSIcon.Size = UDim2.new(0.1, 0, 0.5, 0)
-FPSIcon.Position = UDim2.new(0.58, 0, 0, 5) -- Ближе к тексту FPS
+FPSIcon.Position = UDim2.new(0.58, 0, 0, 5)
 FPSIcon.BackgroundTransparency = 1
 FPSIcon.Image = "rbxassetid://10747382504"
 FPSIcon.Parent = MainFrame
