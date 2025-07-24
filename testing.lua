@@ -10,7 +10,7 @@ TweenService:Create(blur, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingD
 
 -- Создаем ScreenGui
 local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-screenGui.Name = "ChitaLoader"
+screenGui.Name = "CrystalLoader"
 screenGui.ResetOnSpawn = false
 screenGui.IgnoreGuiInset = true
 
