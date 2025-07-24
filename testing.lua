@@ -1,3 +1,4 @@
+print("neverlose.cc")
 local Neverlose_Main = loadstring(game:HttpGet"https://github.com/Mana42138/Neverlose-UI/blob/main/Source.lua")()
 
 local Win = Neverlose_Main:Window({
