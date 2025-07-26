@@ -20,6 +20,19 @@ local Window = WindUI:CreateWindow({
     },
 
 })
+Window:EditOpenButton({
+    Title = "ada",
+    Icon = "gem",
+    CornerRadius = UDim.new(0,16),
+    StrokeThickness = 2,
+    Color = ColorSequence.new( -- gradient
+        Color3.fromHex("1E4F59"), -- морской синий
+        Color3.fromHex("FFFFFF")  -- белый
+    ),
+    OnlyMobile = false,
+    Enabled = false,
+    Draggable = true,
+})
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "MyGui"
 ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
