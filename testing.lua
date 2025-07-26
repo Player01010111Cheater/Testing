@@ -1,56 +1,36 @@
-local function CheckForCrackModules()
-    local Players = game:GetService("Players")
-    local player = Players.LocalPlayer or nil
+-- Симулируемый кряк
+-- Цель: обойти защиту, перехватить warn, отключить kick, замести следы
 
-    local function kick(reason)
-        if player and player.Kick then
-            player:Kick("АнтиКряк: найден модуль \"" .. reason .. "\"")
-        else
-            error("АнтиКряк: найден модуль \"" .. reason .. "\"")
-        end
+-- 1. Перехватываем warn, чтобы защита не могла нас выдать
+local originalWarn = warn
+warn = function(...) return end
+
+-- 2. Подменяем функцию kick, чтобы не сработала
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local oldKick = LocalPlayer.Kick
+
+LocalPlayer.Kick = function(self, ...)
+    -- ничего не делаем, якобы игрок кикнут, но по факту — нет
+    originalWarn("Блокировка Kick: попытка обойти защиту")
+end
+
+-- 3. Подменяем debug.getinfo, чтобы защита не смогла нас разоблачить
+local oldDebugGetInfo = debug.getinfo
+debug.getinfo = function(func)
+    local info = oldDebugGetInfo(func)
+    if typeof(info) == "table" then
+        info.source = "=[C]" -- подделываем источник
     end
+    return info
+end
 
-    local dangerousDebugFuncs = {
-        "getinfo", "getupvalue", "getlocal", "getregistry",
-        "sethook", "gethook", "traceback",
-        "getmetatable", "setmetatable", "setupvalue",
-        "upvalueid", "upvaluejoin",
-    }
-
-    local globalFuncs = {
-        "getgc", "getreg", "getupvalues", "getconstants",
-        "getnilinstances", "islclosure", "is_synapse_function",
-        "hookfunction", "setreadonly", "getconnections"
-    }
-
-    -- Проверка debug-модуля
-    for _, funcName in ipairs(dangerousDebugFuncs) do
-        local func = rawget(debug, funcName)
-        if typeof(func) == "function" then
-            local info = debug.getinfo(func)
-            if info and info.source ~= "=[C]" then
-                kick("debug." .. funcName)
-            end
-        end
-    end
-
-    -- Проверка глобальных функций executors
-    for _, funcName in ipairs(globalFuncs) do
-        local func = getfenv()[funcName]
-        if typeof(func) == "function" then
-            local ok, isLuaClosure = pcall(function() return islclosure(func) end)
-            if ok and isLuaClosure then
-                -- Это Lua-функция, вероятно вставлена executor'ом
-                kick(funcName)
-            else
-                -- Дополнительная проверка через debug.getinfo
-                local info = debug.getinfo(func)
-                if info and info.source and info.source ~= "=[C]" then
-                    kick(funcName)
-                end
-            end
-        end
+-- 4. Удаляем ловушки, если находим
+for k, v in pairs(getfenv()) do
+    if typeof(v) == "function" and debug.getinfo(v).source:find("__bait") then
+        getfenv()[k] = nil
     end
 end
 
-CheckForCrackModules()
+-- 5. Запускаем твой скрипт
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Player01010111Cheater/anticracker_LUA/refs/heads/main/anticrack.lua"))()
