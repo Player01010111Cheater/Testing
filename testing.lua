@@ -1,56 +1,60 @@
--- Создание GUI
-local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
-local Window = WindUI:CreateWindow({
-    Title = "Ptx",
-    Folder = "ada",
-    Size = UDim2.fromOffset(580, 350),
-    Transparent = true,
-    Theme = "Dark",
-    SideBarWidth = 200,
-    -- Background = "", -- rbxassetid only
-    -- BackgroundImageTransparency = 0.42,
-    HideSearchBar = false,
-    ScrollBarEnabled = true,
-    User = {
-        Enabled = true,
-        Anonymous = false,
-        Callback = function()
-            -- Тут логика
-        end,
-    },
+-- Скрипт для эксплойта: извлечение upvalues из EggService
 
-})
-Window:EditOpenButton({
-    Title = "ada",
-    Icon = "gem",
-    CornerRadius = UDim.new(0,16),
-    StrokeThickness = 2,
-    Color = ColorSequence.new( -- gradient
-        Color3.fromHex("1E4F59"), -- морской синий
-        Color3.fromHex("FFFFFF")  -- белый
-    ),
-    OnlyMobile = false,
-    Enabled = false,
-    Draggable = true,
-})
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "MyGui"
-ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- Создание кнопки
-local button = Instance.new("TextButton")
-button.Name = "CenterButton"
-button.Size = UDim2.new(0, 150, 0, 50) -- ширина 150px, высота 50px
-button.Position = UDim2.new(0.5, 80, 0.5, -25) -- немного правее центра (по X)
-button.AnchorPoint = Vector2.new(0.5, 0.5) -- центрирование по центру кнопки
-button.Text = "Click me for open"
-button.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-button.TextColor3 = Color3.fromRGB(255, 255, 255)
-button.Font = Enum.Font.SourceSans
-button.TextSize = 24
-button.Parent = ScreenGui
+-- Функция для вывода upvalues
+local function printUpvalues(func, maxIndex)
+    print("=== Анализ upvalues для функции ===")
+    local info = debug.getinfo(func)
+    print("Имя функции: " .. (info.name or "неизвестно"))
+    print("Количество upvalues: " .. info.nups)
+    
+    for i = 1, maxIndex do
+        local value = getupvalue(func, i)
+        if value ~= nil then
+            print("Upvalue #" .. i .. ":")
+            if type(value) == "table" then
+                for key, val in pairs(value) do
+                    print("  Ключ: " .. tostring(key) .. " | Значение: " .. tostring(val))
+                end
+            else
+                print("  Значение: " .. tostring(value))
+            end
+        else
+            print("Upvalue #" .. i .. ": nil")
+        end
+    end
+    print("=================================")
+end
 
--- Обработка нажатия
-button.MouseButton1Click:Connect(function()
-	Window:Open()
-end)
+-- Анализ RemoteEvent
+local function analyzeRemoteEvent(eventName)
+    local remoteEvent = ReplicatedStorage:FindFirstChild(eventName)
+    if not remoteEvent or not remoteEvent:IsA("RemoteEvent") then
+        warn("RemoteEvent '" .. eventName .. "' не найден или не является RemoteEvent")
+        return
+    end
+
+    print("Найден RemoteEvent: " .. eventName)
+    local connections = getconnections(remoteEvent.OnClientEvent)
+    if #connections == 0 then
+        warn("Нет подключённых функций для " .. eventName)
+        return
+    end
+
+    for i, connection in ipairs(connections) do
+        print("Анализ подключения #" .. i)
+        local func = connection.Function
+        if func then
+            printUpvalues(func, 5) -- Проверяем до 5 upvalues
+        else
+            warn("Функция для подключения #" .. i .. " не найдена")
+        end
+    end
+end
+
+-- Ждём 1 секунду
+wait(1)
+
+-- Анализируем наш RemoteEvent
+analyzeRemoteEvent("EggService")
