@@ -32,7 +32,7 @@ local function UpdateEsp(objectId, petName)
     if not object or not espCache[objectId] then return end
 
     local eggName = object:GetAttribute("EggName")
-    espCache[objectId].Text = {eggName} | {petName}
+    espCache[objectId].Text = `{eggName} | {petName}`
 end
 
 -- Создать ESP над яйцом
@@ -47,7 +47,7 @@ local function AddEsp(object)
     local petName = eggPets[objectId] or "?"
 
     local label = Drawing.new("Text")
-    label.Text = {eggName} | {petName}
+    label.Text = `{eggName} | {petName}`
     label.Size = 18
     label.Color = Color3.new(1, 1, 1)
     label.Outline = true
