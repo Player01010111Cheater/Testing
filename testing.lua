@@ -47,7 +47,7 @@ local function AddEsp(object)
     local petName = eggPets[objectId] or "?"
 
     local label = Drawing.new("Text")
-    label.Text = {eggName} | {petName}
+    label.Text = eggName .. "|" .. PetName
     label.Size = 18
     label.Color = Color3.new(1, 1, 1)
     label.Outline = true
