@@ -49,7 +49,7 @@ local function scanner(name)
     local conn = getconnections(name.OnClientEvent)
     local con_function = conn[1].Function
     local info = debug.getinfo(con_function)
-    print("========Info=========")
+    print("\n========Info=========")
     print("Remote name: " .. name.Name)
     print("Function name: ", info.name or "unknown")
     print("Source: ", info.source, "unknown")
@@ -62,18 +62,12 @@ local function scanner(name)
     print("======Upvalues======")
     if info.nups > 0 then
         local upvalues = getupvalue(con_function, 1)
-        if typeof(upvalues) == "table" and info.nparams then
+        if typeof(upvalues) == "table" then
             for i,v in pairs(upvalues) do
-                if info.nparams == 2 then
-                    print(i, v )
-                elseif info.nparams == 1 then
-                    print(v)
-                else
-                    print("Not supported params count.")
-                    return
-                end
+                print(i,v)
             end
         else
+            print("Type: ", typeof(upvalues))
             print("In function finded function.")
             return
         end
