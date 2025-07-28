@@ -50,7 +50,7 @@ local function scanner(name)
     local con_function = conn[1].Function
     local info = debug.getinfo(con_function)
     print("========Info=========")
-    print("Remote name: " .. name)
+    print("Remote name: " .. name.Name)
     print("Function name: ", info.name or "unknown")
     print("Source: ", info.source, "unknown")
     print("String number: ", info.linedefined or "unknown")
