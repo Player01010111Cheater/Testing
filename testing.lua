@@ -41,40 +41,55 @@ local function getByPath(path)
 end
 
 local function scanner(name)
-    name =  getByPath(name)
+    name = getByPath(name)
     if not name or not name:IsA("RemoteEvent") then
         warn("Invalid or non-RemoteEvent object.")
         return
     end
+
     local conn = getconnections(name.OnClientEvent)
-    local con_function = conn[1].Function
-    local info = debug.getinfo(con_function)
-    print("\n========Info=========")
-    print("Remote name: " .. name.Name)
-    print("Function name: ", info.name or "unknown")
-    print("Source: ", info.source, "unknown")
-    print("String number: ", info.linedefined or "unknown")
-    print("last string: ", info.lastlinedefined or "unknown")
-    print("current line: ", info.currentline or "unknown")
-    print("upvalues count: ", info.nups or "unknown")
-    print("params count: ", info.nparams or "unknown")
-    print("active lines: ", info.activelines or "unknown")
-    print("======Upvalues======")
-    if info.nups > 0 then
-        local upvalues = getupvalue(con_function, 1)
-        if typeof(upvalues) == "table" then
-            for i,v in pairs(upvalues) do
-                print(i,v)
+    if not conn or not conn[1] then
+        warn("No connections found on this RemoteEvent.")
+        return
+    end
+
+    local function analyzeFunction(func)
+        local info = debug.getinfo(func)
+        print("\n========Info=========")
+        print("Function name: ", info.name or "unknown")
+        print("Source: ", info.source or "unknown")
+        print("Line defined: ", info.linedefined or "unknown")
+        print("Last line: ", info.lastlinedefined or "unknown")
+        print("Current line: ", info.currentline or "unknown")
+        print("Upvalues count: ", info.nups or "unknown")
+        print("Params count: ", info.nparams or "unknown")
+        print("Active lines: ", info.activelines or "unknown")
+
+        print("======Upvalues======")
+        if info.nups > 0 then
+            for i = 1, info.nups do
+                local name, value = debug.getupvalue(func, i)
+                if typeof(value) == "table" then
+                    print("[" .. name .. "] (table):")
+                    for k, v in pairs(value) do
+                        print("   ", k, v)
+                    end
+                elseif typeof(value) == "function" then
+                    print("[" .. name .. "] (function): Re-analyzing nested function...")
+                    analyzeFunction(value) -- 🔁 рекурсивный вызов
+                else
+                    print("[" .. name .. "]:", value)
+                end
             end
         else
-            print("Type: ", typeof(upvalues))
-            print("In function finded function.")
-            return
+            print("No upvalues found.")
         end
-    else
-        print("No upvalues finded.")
     end
+
+    print("Remote name: " .. name.Name)
+    analyzeFunction(conn[1].Function)
 end
+
 
 local path = tab_scanner:Input({
     Title = "Name of remote (if this folder use Yourfolder/Name)",
