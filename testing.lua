@@ -40,35 +40,34 @@ local function getByPath(path)
     return obj
 end
 
-local function scanner(name)
-    name = getByPath(name)
-    if not name or not name:IsA("RemoteEvent") then
+local function scanner(path)
+    -- Парсинг пути к RemoteEvent
+    local remote = getByPath(path)
+    if not remote or not remote:IsA("RemoteEvent") then
         warn("Invalid or non-RemoteEvent object.")
         return
     end
 
-    local conn = getconnections(name.OnClientEvent)
+    -- Получение функции
+    local conn = getconnections(remote.OnClientEvent)
     if not conn or not conn[1] then
-        warn("No connections found on this RemoteEvent.")
+        warn("No connection found on remote.")
         return
     end
 
-   local function scanner(name)
-    name = getByPath(name)
-    if not name or not name:IsA("RemoteEvent") then
-        warn("Invalid or non-RemoteEvent object.")
-        return
-    end
+    local con_function = conn[1].Function
+    print("Remote name: " .. remote.Name)
 
-    local conn = getconnections(name.OnClientEvent)
-    if not conn or not conn[1] then
-        warn("No connections found on this RemoteEvent.")
-        return
-    end
+    -- Анализ функции (и рекурсивно её upvalue-функций)
+    local function analyze(func, depth)
+        depth = depth or 0
+        if depth > 5 then
+            print("Reached recursion limit.")
+            return
+        end
 
-    local function analyzeFunction(func)
         local info = debug.getinfo(func)
-        print("\n========Info=========")
+        print("\n======== Function Info ========")
         print("Function name: ", info.name or "unknown")
         print("Source: ", info.source or "unknown")
         print("Line defined: ", info.linedefined or "unknown")
@@ -78,20 +77,16 @@ local function scanner(name)
         print("Params count: ", info.nparams or "unknown")
         print("Active lines: ", info.activelines or "unknown")
 
-        print("======Upvalues======")
         if info.nups > 0 then
+            print("====== Upvalues ======")
             for i = 1, info.nups do
                 local name, value = debug.getupvalue(func, i)
-                if typeof(value) == "table" then
-                    print("[" .. tostring(name) .. "] (table):")
-                    for k, v in pairs(value) do
-                        print("   ", k, v)
-                    end
-                elseif typeof(value) == "function" then
-                    print("[" .. tostring(name) .. "] (function): Re-analyzing nested function...")
-                    analyzeFunction(value) -- 🔁 рекурсивный вызов
-                else
-                    print("[" .. tostring(name) .. "]:", value)
+                local vtype = typeof(value)
+                print("[" .. tostring(name) .. "] (" .. vtype .. "): " .. tostring(value))
+                
+                if vtype == "function" then
+                    print("↪ Re-analyzing nested function...")
+                    analyze(value, depth + 1)
                 end
             end
         else
@@ -99,8 +94,7 @@ local function scanner(name)
         end
     end
 
-    print("Remote name: " .. name.Name)
-    analyzeFunction(conn[1].Function)
+    analyze(con_function)
 end
 
 
