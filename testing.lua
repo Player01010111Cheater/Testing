@@ -53,6 +53,19 @@ local function scanner(name)
         return
     end
 
+   local function scanner(name)
+    name = getByPath(name)
+    if not name or not name:IsA("RemoteEvent") then
+        warn("Invalid or non-RemoteEvent object.")
+        return
+    end
+
+    local conn = getconnections(name.OnClientEvent)
+    if not conn or not conn[1] then
+        warn("No connections found on this RemoteEvent.")
+        return
+    end
+
     local function analyzeFunction(func)
         local info = debug.getinfo(func)
         print("\n========Info=========")
@@ -70,15 +83,15 @@ local function scanner(name)
             for i = 1, info.nups do
                 local name, value = debug.getupvalue(func, i)
                 if typeof(value) == "table" then
-                    print("[" .. name .. "] (table):")
+                    print("[" .. tostring(name) .. "] (table):")
                     for k, v in pairs(value) do
                         print("   ", k, v)
                     end
                 elseif typeof(value) == "function" then
-                    print("[" .. name .. "] (function): Re-analyzing nested function...")
+                    print("[" .. tostring(name) .. "] (function): Re-analyzing nested function...")
                     analyzeFunction(value) -- 🔁 рекурсивный вызов
                 else
-                    print("[" .. name .. "]:", value)
+                    print("[" .. tostring(name) .. "]:", value)
                 end
             end
         else
