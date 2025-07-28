@@ -26,8 +26,22 @@ local window = WindUI:CreateWindow({
 local tab_scanner = window:Tab({Title = "Remote scanner", Icon = "scan-line"})
 tab_scanner:Section({Title = "Remote scanner", Icon = "scan-line", TextSize = 26})
 -- окно
+
+local function getByPath(path)
+    local parts = string.split(path, "/")
+    local obj = game.ReplicatedStorage
+    for _, part in ipairs(parts) do
+        obj = obj:FindFirstChild(part)
+        if not obj then
+            warn("Object not found: " .. part)
+            return nil
+        end
+    end
+    return obj
+end
+
 local function scanner(name)
-    name = game.ReplicatedStorage[name]
+    name =  getByPath(name)
     if not name or not name:IsA("RemoteEvent") then
         warn("Invalid or non-RemoteEvent object.")
         return
