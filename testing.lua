@@ -79,13 +79,13 @@ local function scanner(path)
 
         if info.nups > 0 then
             print("====== Upvalues ======")
-                local name, value = debug.getupvalue(func, 1)
-                local vtype = typeof(value)
-                print("[" .. tostring(name) .. "] (" .. vtype .. "): " .. tostring(value))
+                local name = debug.getupvalue(func, 1)
+                local vtype = typeof(name)
+                print("[" .. tostring(name) .. "] (" .. vtype .. ")")
                 
                 if vtype == "function" then
                     print("↪ Re-analyzing nested function...")
-                    analyze(value, depth + 1)
+                    analyze(name, depth + 1)
             end
         else
             print("No upvalues found.")
