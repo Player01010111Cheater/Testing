@@ -36,17 +36,24 @@ CrystalHubAuth.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
 MainFrame_1.Name = "MainFrame"
 MainFrame_1.Parent = CrystalHubAuth
+MainFrame_1.AnchorPoint = Vector2.new(0.5, 0.5) -- Центр
+MainFrame_1.Position = UDim2.new(0.5, 0, 0.5, 0) -- Всегда в центре
+MainFrame_1.Size = UDim2.new(0, 350, 0, 300) -- Фиксированный размер
 MainFrame_1.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-MainFrame_1.BorderColor3 = Color3.fromRGB(0, 0, 0)
 MainFrame_1.BorderSizePixel = 0
-MainFrame_1.Position = UDim2.new(0.416666687, 0, 0.345886767, 0)
-MainFrame_1.Size = UDim2.new(0.165870488, 0, 0.307158113, 0)
+
+-- Если хочешь, чтобы на очень маленьких экранах уменьшалось:
+local UISizeConstraint = Instance.new("UISizeConstraint")
+UISizeConstraint.MinSize = Vector2.new(300, 250)
+UISizeConstraint.MaxSize = Vector2.new(350, 300)
+UISizeConstraint.Parent = MainFrame_1
 
 UICorner_1.Parent = MainFrame_1
 
 UIStroke_1.Parent = MainFrame_1
 UIStroke_1.Color = Color3.fromRGB(132, 0, 198)
 UIStroke_1.Thickness = 1
+
 
 TextLabel_1.Parent = MainFrame_1
 TextLabel_1.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
