@@ -32,6 +32,7 @@ local UIAspectRatioConstraint_7 = Instance.new("UIAspectRatioConstraint")
 
 -- Properties:
 CrystalHubAuth.Name = "CrystalHubAuth"
+CrystalHubAuth.IgnoreGuiInset = true
 CrystalHubAuth.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
 MainFrame_1.Name = "MainFrame"
@@ -197,7 +198,7 @@ TextButton_1.Active = true
 TextButton_1.BackgroundColor3 = Color3.fromRGB(88, 177, 131)
 TextButton_1.BorderColor3 = Color3.fromRGB(0, 0, 0)
 TextButton_1.BorderSizePixel = 0
-TextButton_1.Position = UDim2.new(0.1, 0, 0.708000124, 0)
+TextButton_1.Position = UDim2.new(0.1, 0, 0.735000124, 0)
 TextButton_1.Size = UDim2.new(0.800000072, 0, 0.152173921, 0)
 TextButton_1.Font = Enum.Font.FredokaOne
 TextButton_1.Text = "Login"
