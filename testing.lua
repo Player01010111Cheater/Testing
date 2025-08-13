@@ -1,5 +1,5 @@
 -- GUI to Lua
--- Version: 0.0.3
+-- Version: 0.0.4
 
 -- Instances:
 local CrystalHubHUD = Instance.new("ScreenGui")
@@ -17,14 +17,14 @@ local UICorner_4 = Instance.new("UICorner")
 -- Properties:
 CrystalHubHUD.Name = "CrystalHubHUD"
 CrystalHubHUD.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-CrystalHubHUD.IgnoreGuiInset = true -- игнорируем Roblox GUI inset
+CrystalHubHUD.IgnoreGuiInset = true
 CrystalHubHUD.ResetOnSpawn = false
 
 Hud_1.Name = "Hud"
 Hud_1.Parent = CrystalHubHUD
 Hud_1.AnchorPoint = Vector2.new(1, 0) -- привязка к правому верхнему углу
 Hud_1.Position = UDim2.new(1, -math.floor(workspace.CurrentCamera.ViewportSize.X * 0.02), 0, math.floor(workspace.CurrentCamera.ViewportSize.Y * 0.02))
-Hud_1.Size = UDim2.new(0, math.floor(workspace.CurrentCamera.ViewportSize.X * 0.2), 0, math.floor(workspace.CurrentCamera.ViewportSize.Y * 0.05))
+Hud_1.Size = UDim2.new(0, math.floor(workspace.CurrentCamera.ViewportSize.X * 0.25), 0, math.floor(workspace.CurrentCamera.ViewportSize.Y * 0.06)) -- увеличено
 Hud_1.BackgroundColor3 = Color3.fromRGB(44, 44, 44)
 Hud_1.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Hud_1.BorderSizePixel = 0
@@ -42,7 +42,7 @@ FPSDivider_1.Parent = Hud_1
 FPSDivider_1.BackgroundColor3 = Color3.fromRGB(175, 175, 175)
 FPSDivider_1.BorderColor3 = Color3.fromRGB(0, 0, 0)
 FPSDivider_1.BorderSizePixel = 0
-FPSDivider_1.Position = UDim2.new(0.432989687, 0, 0, 0)
+FPSDivider_1.Position = UDim2.new(0.45, 0, 0, 0)
 FPSDivider_1.Size = UDim2.new(0, 1, 1, 0)
 
 UICorner_2.Parent = FPSDivider_1
@@ -53,10 +53,10 @@ LoginName_1.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 LoginName_1.BackgroundTransparency = 1
 LoginName_1.BorderColor3 = Color3.fromRGB(0, 0, 0)
 LoginName_1.BorderSizePixel = 0
-LoginName_1.Position = UDim2.new(0.436560929, 0, 0.15, 0)
+LoginName_1.Position = UDim2.new(0.46, 0, 0.15, 0)
 LoginName_1.Size = UDim2.new(0.5, 0, 0.7, 0)
 LoginName_1.Font = Enum.Font.FredokaOne
-LoginName_1.Text = "?????????"
+LoginName_1.Text = "00:00"
 LoginName_1.TextColor3 = Color3.fromRGB(255, 255, 255)
 LoginName_1.TextScaled = true
 LoginName_1.TextWrapped = true
@@ -78,9 +78,26 @@ ScriptName_1.TextWrapped = true
 
 UICorner_4.Parent = ScriptName_1
 
--- Адаптация при смене размера окна:
+-- Функция обновления времени
+local function updateTime()
+    pcall(function()
+        LoginName_1.Text = os.date("%H:%M")
+    end)
+end
+
+-- Обновляем каждую секунду
+updateTime()
+task.spawn(function()
+    while true do
+        updateTime()
+        task.wait(1)
+    end
+end)
+
+-- Адаптация при изменении размера окна
 workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
 	local vp = workspace.CurrentCamera.ViewportSize
 	Hud_1.Position = UDim2.new(1, -math.floor(vp.X * 0.02), 0, math.floor(vp.Y * 0.02))
-	Hud_1.Size = UDim2.new(0, math.floor(vp.X * 0.2), 0, math.floor(vp.Y * 0.05))
+	Hud_1.Size = UDim2.new(0, math.floor(vp.X * 0.25), 0, math.floor(vp.Y * 0.06))
 end)
+
