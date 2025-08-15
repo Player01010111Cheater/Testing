@@ -120,8 +120,8 @@ local function function_info(path)
             info.source or "unknown",
             info.linedefined or "unknown",
             info.lastlinedefined or "unknown",
-            info.currentline or "unknown",
             info.nparams or "unknown",
+            info.currentline or "unknown",
             info.nups or "unknown"
         ),
         Buttons = {
@@ -246,7 +246,6 @@ local function valueToString(val)
     end
 end
 
--- Функция сканирования upvalues
 local function scanUpvalues(path)
     local remote = getByPath(path)
     if not remote then
@@ -272,10 +271,17 @@ local function scanUpvalues(path)
     local func = conn[1].Function
     local upvalues = {}
     for i = 1, debug.getinfo(func).nups do
-        local name, value = debug.getupvalue(func, i)
+        local returns = {debug.getupvalue(func, i)}
+        local name, value
+        if #returns == 2 then
+            name, value = returns[1], returns[2]
+        else
+            name = "unknown"  -- Фиксированное имя для Roblox/exploit-ов
+            value = returns[1]
+        end
         table.insert(upvalues, {
             Index = i,
-            Name = name,
+            Name = name or "nil",  -- Гарантируем строку
             Value = value,
             Type = typeof(value)
         })
@@ -289,7 +295,7 @@ local function scanUpvalues(path)
 
     for _, uv in ipairs(upvalues) do
         local title = string.format("[%d] %s (%s): %s",
-            uv.Index, uv.Name, uv.Type, valueToString(uv.Value))
+            uv.Index, tostring(uv.Name), uv.Type, valueToString(uv.Value))
 
         tab:Button({
             Title = title,
