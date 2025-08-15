@@ -115,12 +115,13 @@ local function function_info(path)
         Title = "Remote Info",
         Icon = "info",
         Content = string.format(
-            "Remote name: %s\nFunction name: %s\nSource: %s\nLine defined: %s\nLast line: %s\nParams count: %s\nUpvalues count: %s",
+            "Remote name: %s\nFunction name: %s\nSource: %s\nLine defined: %s\nLast line: %s\nParams count: %s\nCurrent Line: %s\nUpvalues count: %s",
             remote.Name,
             info.name or "unknown",
             info.source or "unknown",
             info.linedefined or "unknown",
             info.lastlinedefined or "unknown",
+            info.currentline or "unknown",
             info.nparams or "unknown",
             info.nups or "unknown"
         ),
@@ -216,3 +217,118 @@ tab_scanner:Button({
     end
 })
 
+
+
+
+-- Функция для красивого преобразования значения в строку
+local function valueToString(val)
+    local t = typeof(val)
+    if t == "string" then
+        return '"' .. val .. '"'
+    elseif t == "table" then
+        local ok, str = pcall(function()
+            return game:GetService("HttpService"):JSONEncode(val)
+        end)
+        return ok and str or tostring(val)
+    else
+        return tostring(val)
+    end
+end
+
+-- Функция сканирования upvalues
+local function scanUpvalues(path)
+    local remote = getByPath(path)
+    if not remote then
+        notify("RemoteScanner", "Path not found", "triangle-alert", 3)
+        return
+    end
+    if not (remote:IsA("RemoteEvent") or remote:IsA("RemoteFunction")) then
+        notify("RemoteScanner", "Not a RemoteEvent/RemoteFunction", "triangle-alert", 3)
+        return
+    end
+
+    local conn
+    if remote:IsA("RemoteEvent") then
+        conn = getconnections(remote.OnClientEvent)
+    elseif remote:IsA("RemoteFunction") then
+        conn = getconnections(remote.OnClientInvoke)
+    end
+    if not conn or not conn[1] then
+        notify("RemoteScanner", "No connections found", "triangle-alert", 3)
+        return
+    end
+
+    local con_function = conn[1].Function
+    local upvalues = {}
+    local i = 1
+
+    while true do
+        local name, value = debug.getupvalue(con_function, i)
+        if not name then break end
+        table.insert(upvalues, {
+            Index = i,
+            Name = name,
+            Value = value,
+            Type = typeof(value)
+        })
+        i = i + 1
+    end
+
+    if #upvalues == 0 then
+        notify("RemoteScanner", "No upvalues found", "info", 3)
+        return
+    end
+
+    local tab = window:Tab({Title = "Upvalues: " .. remote.Name, Icon = "eye"})
+
+    for _, uv in ipairs(upvalues) do
+        local title = string.format("[%d] %s (%s): %s",
+            uv.Index, uv.Name, uv.Type, valueToString(uv.Value))
+
+        tab:Button({
+            Title = title,
+            Callback = function()
+                if uv.Type == "function" then
+                    local info = debug.getinfo(uv.Value)
+                    WindUI:Popup({
+                        Title = "Upvalue Function Info",
+                        Icon = "info",
+                        Content = string.format(
+                            "Name: %s\nSource: %s\nLine defined: %s\nLast line: %s\nParams: %s\nUpvalues: %s",
+                            info.name or "unknown",
+                            info.source or "unknown",
+                            info.linedefined or "unknown",
+                            info.lastlinedefined or "unknown",
+                            info.nparams or "unknown",
+                            info.nups or "unknown"
+                        ),
+                        Buttons = {
+                            {
+                                Title = "Close",
+                                Callback = function() end,
+                                Variant = "Tertiary",
+                            }
+                        }
+                    })
+                else
+                    notify("RemoteScanner", "Value: " .. valueToString(uv.Value), "info", 5)
+                end
+            end
+        })
+    end
+end
+
+-- Поле ввода и кнопка для tab_upvalue_scanner
+local upvaluePath = tab_upvalue_scanner:Input({
+    Title = "Remote path for upvalue scan",
+    InputIcon = "search",
+    Placeholder = "Enter remote path...",
+    Callback = function () return end
+})
+
+tab_upvalue_scanner:Button({
+    Title = "Scan Upvalues",
+    Callback = function ()
+        scanUpvalues(upvaluePath.Value)
+    end
+})
