@@ -223,53 +223,8 @@ tab_scanner:Button({
 
 
 -- Функция для красивого преобразования значения в строк
-local function getupvalues_Powered(func)
-    for v = 1, 5 do
-        local name, upvalue = debug.getupvalue(func, v)
-        if typeof(upvalue) == "function" then
-            return true -- найден upvalue типа function
-        else
-            for val1, val2 in pairs(upvalue) do
-                print("Name: ", name)
-                print("Argument #1: ", val1)
-                print("Argument #2: ", val2)
-            end
-        end
-    end
-end
-
-local function failed(f)
-    WindUI:Popup({
-        Title = "GetUpValues Result",
-        Icon = "triangle-alert",
-        Content = "Result: Failed\nType: Function\nReason: Please try again with function",
-        Buttons = {
-            {
-                Title = "Get Function Info",
-                Icon = "info",
-                Callback = function ()
-                    function_info(f)
-                end,
-                Variant = "Secondary"
-            },
-            {
-                Title = "Try again",
-                Icon = "history",
-                Callback = function ()
-                    if getupvalues_Powered(f) then
-                        notify("RemoteScanner", "Function upvalue still exists", "info", 3)
-                    else
-                        notify("RemoteScanner", "No function upvalues found", "check", 3)
-                    end
-                end
-            },
-            {
-                Title = "Close",
-                Callback = function() end,
-                Variant = "Primary",
-            }
-        }
-    })   
+local function is_function(func)
+    return typeof(func) == "function"
 end
 
 local function scanUpvalues(path)
@@ -297,8 +252,21 @@ local function scanUpvalues(path)
     end
 
     local func = conn[1].Function
-    if getupvalues_Powered(func) then
-        failed(func)
+    for v = 1, 5 do
+        local a = getupvalue(func, v)
+        if is_function(a) then
+            for t = 1, 5 do
+                local b = getupvalue(a, t)
+                if not is_function(b) and typeof(b) == "table" then
+                    for val1, val2 in pairs(b) do
+                        notify("UpValue", val1, "info", 3)
+                        notify("UpValue", val2, "info", 3)
+                    end
+                    break
+                end
+            end
+            break
+        end
     end
 end
 
