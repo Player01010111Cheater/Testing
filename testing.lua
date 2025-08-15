@@ -235,9 +235,16 @@ local function formatUpvalue(func, depth)
         for i = 1, info.nups do
             local Upvalue = getupvalue(func, i)
             if not is_function(Upvalue) and typeof(Upvalue) == "table" then
-                for val1, val2 in pairs(Upvalue) do
-                    print("UpValue 1: ", val1)
-                    print("UpValue 2: ", val2)
+                for name, val2 in pairs(Upvalue) do
+                    if is_function(val2) then
+                        local va = getupvalue(val2, 1)
+                        for val, val1 in pairs(va) do
+                            print(val)
+                            print(val1)
+                        end
+                    else
+                        print(val2)
+                    end
                 end
             else
                 formatUpvalue(Upvalue, depth + 1)
