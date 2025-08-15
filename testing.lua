@@ -247,10 +247,12 @@ local function scanUpvalues(path)
 
     local func = conn[1].Function
     local info = debug.getinfo(func)
-    if info.nups > 0 then
-        local upvalue = getupvalue(func, 1)
-        if upvalue then
-            print(upvalue)
+    for i = 1, 5 do
+        if getupvalue(func, i) then
+            for t, v in pairs(getupvalue(func, i)) do
+                print(string.format("#1 Argument: %s\n#2 Argument: %s", t, v))
+            end
+            break
         end
     end
 end
@@ -269,3 +271,4 @@ tab_upvalue_scanner:Button({
         scanUpvalues(upvaluePath.Value)
     end
 })
+
