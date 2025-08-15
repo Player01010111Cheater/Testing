@@ -223,12 +223,62 @@ tab_scanner:Button({
 
 
 -- Функция для красивого преобразования значения в строк
+local function getupvalues_Powered(func)
+    for v = 1, 5 do
+        local name, upvalue = debug.getupvalue(func, v)
+        if typeof(upvalue) == "function" then
+            return true -- найден upvalue типа function
+        else
+            for val1, val2 in pairs(upvalue) do
+                print("Name: ", name)
+                print("Argument #1: ", val1)
+                print("Argument #2: ", val2)
+            end
+        end
+    end
+end
+
+local function failed(f)
+    WindUI:Popup({
+        Title = "GetUpValues Result",
+        Icon = "triangle-alert",
+        Content = "Result: Failed\nType: Function\nReason: Please try again with function",
+        Buttons = {
+            {
+                Title = "Get Function Info",
+                Icon = "info",
+                Callback = function ()
+                    function_info(f)
+                end,
+                Variant = "Secondary"
+            },
+            {
+                Title = "Try again",
+                Icon = "history",
+                Callback = function ()
+                    if getupvalues_Powered(f) then
+                        notify("RemoteScanner", "Function upvalue still exists", "info", 3)
+                    else
+                        notify("RemoteScanner", "No function upvalues found", "check", 3)
+                    end
+                end
+            },
+            {
+                Title = "Close",
+                Callback = function() end,
+                Variant = "Primary",
+            }
+        }
+    })   
+end
+
 local function scanUpvalues(path)
     local remote = getByPath(path)
     if not remote then
         notify("RemoteScanner", "Path not found", "triangle-alert", 3)
         return
     end
+
     if not (remote:IsA("RemoteEvent") or remote:IsA("RemoteFunction")) then
         notify("RemoteScanner", "Not a RemoteEvent/RemoteFunction", "triangle-alert", 3)
         return
@@ -240,22 +290,18 @@ local function scanUpvalues(path)
     elseif remote:IsA("RemoteFunction") then
         conn = getconnections(remote.OnClientInvoke)
     end
+
     if not conn or not conn[1] then
         notify("RemoteScanner", "No connections found", "triangle-alert", 3)
         return
     end
 
     local func = conn[1].Function
-    local info = debug.getinfo(func)
-    for i = 1, 5 do
-        if getupvalue(func, i) then
-            for t, v in pairs(getupvalue(func, i)) do
-                print(string.format("#1 Argument: %s\n#2 Argument: %s", t, v))
-            end
-            break
-        end
+    if getupvalues_Powered(func) then
+        failed(func)
     end
 end
+
 
 -- Поле ввода и кнопка для tab_upvalue_scanner
 local upvaluePath = tab_upvalue_scanner:Input({
@@ -271,4 +317,3 @@ tab_upvalue_scanner:Button({
         scanUpvalues(upvaluePath.Value)
     end
 })
-
