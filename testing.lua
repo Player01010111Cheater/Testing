@@ -230,11 +230,11 @@ end
 -- Рекурсивная функция для форматирования значений с отступами
 local function formatUpvalue(func, depth)
     depth = depth or 0
-    local info = debug.getinfo(func)
     if typeof(func) == "function" then
+        local info = debug.getinfo(func)
         for i = 1, info.nups do
             local Upvalue = getupvalue(func, i)
-            if not is_function(Upvalue) then
+            if not is_function(Upvalue) and typeof(Upvalue) == "table" then
                 for val1, val2 in pairs(Upvalue) do
                     print("UpValue 1: ", val1)
                     print("UpValue 2: ", val2)
@@ -245,7 +245,6 @@ local function formatUpvalue(func, depth)
         end
     else
         print(func)
-        return func
     end
 end
 
