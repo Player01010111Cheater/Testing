@@ -227,6 +227,17 @@ local function is_function(func)
     return typeof(func) == "function"
 end
 
+local function getupsvalues(func)
+    local info = debug.getinfo(func)
+    local nup = info.nups
+    for num = 1,nup do
+        local value = getupvalue(func, num)
+        if value then
+            return value
+        end
+    end
+end
+
 -- Рекурсивная функция для форматирования значений с отступами
 local function formatUpvalue(func, depth)
     depth = depth or 0
@@ -234,20 +245,16 @@ local function formatUpvalue(func, depth)
         local info = debug.getinfo(func)
         for i = 1, info.nups do
             local Upvalue = getupvalue(func, i)
-            if not is_function(Upvalue) and typeof(Upvalue) == "table" then
-                for name, val2 in pairs(Upvalue) do
-                    if is_function(val2) then
-                        local va = getupvalue(val2, 1)
-                        for val, val1 in pairs(va) do
-                            print(val)
-                            print(val1)
-                        end
+            if is_function(Upvalue) then
+                formatUpvalue(Upvalue, depth + 1)
+            else
+                for _, v in pairs(Upvalue) do
+                    if is_function(v) then
+                        print(getupsvalues(v))
                     else
-                        print(val2)
+                        print(v)
                     end
                 end
-            else
-                formatUpvalue(Upvalue, depth + 1)
             end
         end
     else
