@@ -130,7 +130,7 @@ local function function_info(path)
                 Icon = "copy",
                 Callback = function()
                     if setclipboard then
-                        setclipboard(remote:GetFullName())
+                        setclipboard("game." .. remote:GetFullName())
                         notify("RemoteScanner", "Path copied to clipboard!", "check", 3)
                     else
                         notify("RemoteScanner", "Clipboard not supported in this exploit.", "triangle-alert", 3)
@@ -269,22 +269,17 @@ local function scanUpvalues(path)
         return
     end
 
-    local con_function = conn[1].Function
+    local func = conn[1].Function
     local upvalues = {}
-    local i = 1
-
-    while true do
-        local name, value = debug.getupvalue(con_function, i)
-        if not name then break end
+    for i = 1, debug.getinfo(func).nups do
+        local name, value = debug.getupvalue(func, i)
         table.insert(upvalues, {
             Index = i,
             Name = name,
             Value = value,
             Type = typeof(value)
         })
-        i = i + 1
     end
-
     if #upvalues == 0 then
         notify("RemoteScanner", "No upvalues found", "info", 3)
         return
@@ -343,4 +338,3 @@ tab_upvalue_scanner:Button({
         scanUpvalues(upvaluePath.Value)
     end
 })
-
