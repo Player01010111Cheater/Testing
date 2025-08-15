@@ -174,16 +174,7 @@ local path = tab_scanner:Input({
 tab_scanner:Button({
     Title = "Start scan",
     Callback = function ()
-        local tabl = function_info(path.Value)
-        if tabl and tabl.Name then
-            local tab = window:Tab({Title = tabl.Name, Icon = "bot"})
-            tab:Button({
-                Title = "Fire Remote",
-                Callback = function ()
-                    tabl.Path:FireServer()
-                end
-            })
-        end
+        function_info(path.Value)
     end
 })
 
@@ -231,21 +222,7 @@ tab_scanner:Button({
 
 
 
--- Функция для красивого преобразования значения в строку
-local function valueToString(val)
-    local t = typeof(val)
-    if t == "string" then
-        return '"' .. val .. '"'
-    elseif t == "table" then
-        local ok, str = pcall(function()
-            return game:GetService("HttpService"):JSONEncode(val)
-        end)
-        return ok and str or tostring(val)
-    else
-        return tostring(val)
-    end
-end
-
+-- Функция для красивого преобразования значения в строк
 local function scanUpvalues(path)
     local remote = getByPath(path)
     if not remote then
@@ -269,64 +246,12 @@ local function scanUpvalues(path)
     end
 
     local func = conn[1].Function
-    local upvalues = {}
-    for i = 1, debug.getinfo(func).nups do
-        local returns = {debug.getupvalue(func, i)}
-        local name, value
-        if #returns == 2 then
-            name, value = returns[1], returns[2]
-        else
-            name = "unknown"  -- Фиксированное имя для Roblox/exploit-ов
-            value = returns[1]
+    local info = debug.getinfo(func)
+    if info.nups > 0 then
+        local upvalue = getupvalue(func, 1)
+        if upvalue then
+            print(upvalue)
         end
-        table.insert(upvalues, {
-            Index = i,
-            Name = name or "nil",  -- Гарантируем строку
-            Value = value,
-            Type = typeof(value)
-        })
-    end
-    if #upvalues == 0 then
-        notify("RemoteScanner", "No upvalues found", "info", 3)
-        return
-    end
-
-    local tab = window:Tab({Title = "Upvalues: " .. remote.Name, Icon = "eye"})
-
-    for _, uv in ipairs(upvalues) do
-        local title = string.format("[%d] %s (%s): %s",
-            uv.Index, tostring(uv.Name), uv.Type, valueToString(uv.Value))
-
-        tab:Button({
-            Title = title,
-            Callback = function()
-                if uv.Type == "function" then
-                    local info = debug.getinfo(uv.Value)
-                    WindUI:Popup({
-                        Title = "Upvalue Function Info",
-                        Icon = "info",
-                        Content = string.format(
-                            "Name: %s\nSource: %s\nLine defined: %s\nLast line: %s\nParams: %s\nUpvalues: %s",
-                            info.name or "unknown",
-                            info.source or "unknown",
-                            info.linedefined or "unknown",
-                            info.lastlinedefined or "unknown",
-                            info.nparams or "unknown",
-                            info.nups or "unknown"
-                        ),
-                        Buttons = {
-                            {
-                                Title = "Close",
-                                Callback = function() end,
-                                Variant = "Tertiary",
-                            }
-                        }
-                    })
-                else
-                    notify("RemoteScanner", "Value: " .. valueToString(uv.Value), "info", 5)
-                end
-            end
-        })
     end
 end
 
