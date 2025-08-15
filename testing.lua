@@ -222,11 +222,36 @@ tab_scanner:Button({
 
 
 
--- Функция для красивого преобразования значения в строк
+-- Проверка, является ли объект функцией
 local function is_function(func)
     return typeof(func) == "function"
 end
 
+-- Универсальная обработка upvalues функции или таблицы
+local function processUpvalues(obj, depth)
+    depth = depth or 0
+    if depth > 5 then return end  -- ограничение глубины рекурсии
+
+    if is_function(obj) then
+        -- Обходим upvalues функции
+        for i = 1, 50 do  -- увеличиваем лимит, если upvalues много
+            local val = getupvalue(obj, i)
+            if not val then break end
+            processUpvalues(val, depth + 1)
+        end
+    elseif typeof(obj) == "table" then
+        -- Обходим ключи и значения таблицы
+        for k, v in pairs(obj) do
+            processUpvalues(k, depth + 1)
+            processUpvalues(v, depth + 1)
+        end
+    else
+        -- Простой тип — уведомляем
+        notify("UpValue", obj, "info", 3)
+    end
+end
+
+-- Основная функция сканирования RemoteEvent/RemoteFunction
 local function scanUpvalues(path)
     local remote = getByPath(path)
     if not remote then
@@ -252,22 +277,8 @@ local function scanUpvalues(path)
     end
 
     local func = conn[1].Function
-    for v = 1, 5 do
-        local a = getupvalue(func, v)
-        if is_function(a) then
-            for t = 1, 5 do
-                local b = getupvalue(a, t)
-                if not is_function(b) and typeof(b) == "table" then
-                    for val1, val2 in pairs(b) do
-                        notify("UpValue", val1, "info", 3)
-                        notify("UpValue", val2, "info", 3)
-                    end
-                    break
-                end
-            end
-            break
-        end
-    end
+    -- Рекурсивная обработка всех upvalues функции
+    processUpvalues(func)
 end
 
 
