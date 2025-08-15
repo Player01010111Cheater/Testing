@@ -230,20 +230,28 @@ end
 -- Рекурсивная функция для форматирования значений с отступами
 local function formatUpvalue(obj, depth)
     depth = depth or 0
-    local indent = string.rep("  ", depth) -- два пробела на уровень
+    local indent = string.rep("  ", depth)
     local result = ""
 
-    if is_function(obj) then
+    if typeof(obj) == "function" then
         result = result .. indent .. "Function: " .. tostring(obj) .. "\n"
-        -- Обход upvalues функции
-        for i = 1, 50 do
-            local val = getupvalue(obj, i)
-            if not val then break end
-            result = result .. formatUpvalue(val, depth + 1)
+        local info = debug.getinfo(obj)
+        local nups = info.nups or 0
+        for i = 1, nups do
+            local name, val = getupvalue(obj, i)
+            if val ~= nil then
+                result = result .. formatUpvalue(val, depth + 1)
+            end
         end
     elseif typeof(obj) == "table" then
         result = result .. indent .. "Table: " .. tostring(obj) .. "\n"
+        local count = 0
         for k, v in pairs(obj) do
+            count = count + 1
+            if count > 50 then
+                result = result .. indent .. "  ... (table truncated)\n"
+                break
+            end
             result = result .. indent .. "Key:\n" .. formatUpvalue(k, depth + 1)
             result = result .. indent .. "Value:\n" .. formatUpvalue(v, depth + 1)
         end
@@ -253,6 +261,7 @@ local function formatUpvalue(obj, depth)
 
     return result
 end
+
 
 -- Основная функция сканирования RemoteEvent/RemoteFunction
 local function scanUpvalues(path)
