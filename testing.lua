@@ -227,40 +227,43 @@ local function is_function(func)
     return typeof(func) == "function"
 end
 
--- Универсальная обработка upvalues функции или таблицы
-local function processUpvalues(obj, depth)
+-- Рекурсивная функция для форматирования значений с отступами
+local function formatUpvalue(obj, depth)
     depth = depth or 0
-    if depth > 5 then return end  -- ограничение глубины рекурсии
+    local indent = string.rep("  ", depth) -- два пробела на уровень
+    local result = ""
 
     if is_function(obj) then
-        -- Обходим upvalues функции
-        for i = 1, 50 do  -- увеличиваем лимит, если upvalues много
+        result = result .. indent .. "Function: " .. tostring(obj) .. "\n"
+        -- Обход upvalues функции
+        for i = 1, 50 do
             local val = getupvalue(obj, i)
             if not val then break end
-            processUpvalues(val, depth + 1)
+            result = result .. formatUpvalue(val, depth + 1)
         end
     elseif typeof(obj) == "table" then
-        -- Обходим ключи и значения таблицы
+        result = result .. indent .. "Table: " .. tostring(obj) .. "\n"
         for k, v in pairs(obj) do
-            processUpvalues(k, depth + 1)
-            processUpvalues(v, depth + 1)
+            result = result .. indent .. "Key:\n" .. formatUpvalue(k, depth + 1)
+            result = result .. indent .. "Value:\n" .. formatUpvalue(v, depth + 1)
         end
     else
-        -- Простой тип — уведомляем
-        notify("UpValue", obj, "info", 3)
+        result = result .. indent .. tostring(obj) .. "\n"
     end
+
+    return result
 end
 
 -- Основная функция сканирования RemoteEvent/RemoteFunction
 local function scanUpvalues(path)
     local remote = getByPath(path)
     if not remote then
-        notify("RemoteScanner", "Path not found", "triangle-alert", 3)
+        WindUI:Popup({Title = "Error", Content = "Path not found", Icon = "triangle-alert"})
         return
     end
 
     if not (remote:IsA("RemoteEvent") or remote:IsA("RemoteFunction")) then
-        notify("RemoteScanner", "Not a RemoteEvent/RemoteFunction", "triangle-alert", 3)
+        WindUI:Popup({Title = "Error", Content = "Not a RemoteEvent/RemoteFunction", Icon = "triangle-alert"})
         return
     end
 
@@ -272,14 +275,37 @@ local function scanUpvalues(path)
     end
 
     if not conn or not conn[1] then
-        notify("RemoteScanner", "No connections found", "triangle-alert", 3)
+        WindUI:Popup({Title = "Error", Content = "No connections found", Icon = "triangle-alert"})
         return
     end
 
     local func = conn[1].Function
-    -- Рекурсивная обработка всех upvalues функции
-    processUpvalues(func)
+    local content = "Upvalues for " .. remote.Name .. ":\n" .. formatUpvalue(func)
+
+    WindUI:Popup({
+        Title = "Remote Info",
+        Icon = "info",
+        Content = content,
+        Buttons = {
+            {
+                Title = "Copy",
+                Icon = "copy",
+                Callback = function()
+                    if setclipboard then
+                        setclipboard(content)
+                    end
+                end,
+                Variant = "Secondary",
+            },
+            {
+                Title = "Close",
+                Callback = function() end,
+                Variant = "Primary",
+            }
+        }
+    })
 end
+
 
 
 -- Поле ввода и кнопка для tab_upvalue_scanner
