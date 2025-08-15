@@ -174,3 +174,45 @@ tab_scanner:Button({
         end
     end
 })
+
+
+
+tab_scanner:Divider()
+-- Функция для просмотра содержимого папки
+local function scanFolder(path)
+    local folder = getByPath(path)
+    if not folder or not folder:IsA("Folder") then
+        notify("RemoteScanner", "Path is not a folder or not found.", "triangle-alert", 3)
+        return
+    end
+
+    local tab = window:Tab({Title = "Folder: " .. folder.Name, Icon = "folder"})
+    for _, obj in ipairs(folder:GetChildren()) do
+        tab:Button({
+            Title = obj.Name .. " (" .. obj.ClassName .. ")",
+            Callback = function()
+                if obj:IsA("RemoteEvent") or obj:IsA("RemoteFunction") then
+                    function_info(path .. "/" .. obj.Name)
+                else
+                    notify("RemoteScanner", obj.Name .. " is not a RemoteEvent/RemoteFunction", "info", 3)
+                end
+            end
+        })
+    end
+end
+
+-- UI для ввода пути к папке
+local folderPath = tab_scanner:Input({
+    Title = "Folder path (example: MyFolder or game.ReplicatedStorage.MyFolder)",
+    InputIcon = "folder",
+    Placeholder = "Enter folder path...",
+    Callback = function () return end
+})
+
+tab_scanner:Button({
+    Title = "Scan Folder",
+    Callback = function ()
+        scanFolder(folderPath.Value)
+    end
+})
+
