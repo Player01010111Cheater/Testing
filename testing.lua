@@ -235,8 +235,10 @@ local function formatUpvalue(func, depth)
         for i = 1, info.nups do
             local Upvalue = getupvalue(func, i)
             if not is_function(Upvalue) then
-                print(Upvalue)
-                return Upvalue
+                for val1, val2 in pairs(Upvalue) do
+                    print("UpValue 1: ", val1)
+                    print("UpValue 2: ", val2)
+                end
             else
                 formatUpvalue(Upvalue, depth + 1)
             end
@@ -274,30 +276,7 @@ local function scanUpvalues(path)
     end
 
     local func = conn[1].Function
-    local content = "Upvalues for " .. remote.Name .. ":\n" .. formatUpvalue(func)
-
-    WindUI:Popup({
-        Title = "Remote Info",
-        Icon = "info",
-        Content = content,
-        Buttons = {
-            {
-                Title = "Copy",
-                Icon = "copy",
-                Callback = function()
-                    if setclipboard then
-                        setclipboard(content)
-                    end
-                end,
-                Variant = "Secondary",
-            },
-            {
-                Title = "Close",
-                Callback = function() end,
-                Variant = "Primary",
-            }
-        }
-    })
+    formatUpvalue(func)
 end
 
 
