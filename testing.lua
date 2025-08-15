@@ -110,7 +110,6 @@ local function function_info(path)
     print("Params count:", info.nparams or "unknown")
     print("Active lines:", info.activelines or "unknown")
 
-    -- Вывод в Popup WindUI
     WindUI:Popup({
         Title = "Remote Info",
         Icon = "info",
@@ -126,6 +125,19 @@ local function function_info(path)
             info.nups or "unknown"
         ),
         Buttons = {
+            {
+                Title = "Copy Path",
+                Icon = "copy",
+                Callback = function()
+                    if setclipboard then
+                        setclipboard(remote:GetFullName())
+                        notify("RemoteScanner", "Path copied to clipboard!", "check", 3)
+                    else
+                        notify("RemoteScanner", "Clipboard not supported in this exploit.", "triangle-alert", 3)
+                    end
+                end,
+                Variant = "Secondary",
+            },
             {
                 Title = "Fire Remote",
                 Icon = "zap",
@@ -145,7 +157,6 @@ local function function_info(path)
             }
         }
     })
-
     return {
         Name = remote.Name,
         Path = remote
@@ -332,3 +343,4 @@ tab_upvalue_scanner:Button({
         scanUpvalues(upvaluePath.Value)
     end
 })
+
