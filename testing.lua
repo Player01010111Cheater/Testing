@@ -92,7 +92,7 @@ local function function_info(path)
     end
 
     if not conn or not conn[1] then
-        warn("No connection found on remote.")
+        notify("Remote Info", "No connection found on remote.", "info", 3)
         return
     end
 
