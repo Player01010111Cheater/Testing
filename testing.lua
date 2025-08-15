@@ -1,103 +1,176 @@
--- GUI to Lua
--- Version: 0.0.4
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
--- Instances:
-local CrystalHubHUD = Instance.new("ScreenGui")
-local Hud_1 = Instance.new("Frame")
-local UICorner_1 = Instance.new("UICorner")
-local UIGradient_1 = Instance.new("UIGradient")
-local UIStroke_1 = Instance.new("UIStroke")
-local FPSDivider_1 = Instance.new("Frame")
-local UICorner_2 = Instance.new("UICorner")
-local LoginName_1 = Instance.new("TextLabel")
-local UICorner_3 = Instance.new("UICorner")
-local ScriptName_1 = Instance.new("TextLabel")
-local UICorner_4 = Instance.new("UICorner")
 
--- Properties:
-CrystalHubHUD.Name = "CrystalHubHUD"
-CrystalHubHUD.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-CrystalHubHUD.IgnoreGuiInset = true
-CrystalHubHUD.ResetOnSpawn = false
+local window = WindUI:CreateWindow({
+    Title = "Remote scanner",
+    Icon = "scan-line",
+    Folder = "RemoteScanner",
+    Size = UDim2.fromOffset(580, 350),
+    Transparent = true,
+    Theme = "Dark",
+    SideBarWidth = 200,
+    -- Background = "", -- rbxassetid only
+    -- BackgroundImageTransparency = 0.42,
+    HideSearchBar = false,
+    ScrollBarEnabled = true,
+    User = {
+        Enabled = true,
+        Anonymous = false,
+        Callback = function()
+            -- Тут логика
+        end,
+    },
 
-Hud_1.Name = "Hud"
-Hud_1.Parent = CrystalHubHUD
-Hud_1.AnchorPoint = Vector2.new(1, 0) -- привязка к правому верхнему углу
-Hud_1.Position = UDim2.new(1, -math.floor(workspace.CurrentCamera.ViewportSize.X * 0.02), 0, math.floor(workspace.CurrentCamera.ViewportSize.Y * 0.02))
-Hud_1.Size = UDim2.new(0, math.floor(workspace.CurrentCamera.ViewportSize.X * 0.25), 0, math.floor(workspace.CurrentCamera.ViewportSize.Y * 0.06)) -- увеличено
-Hud_1.BackgroundColor3 = Color3.fromRGB(44, 44, 44)
-Hud_1.BorderColor3 = Color3.fromRGB(0, 0, 0)
-Hud_1.BorderSizePixel = 0
+})
 
-UICorner_1.Parent = Hud_1
-UIGradient_1.Parent = Hud_1
-
-UIStroke_1.Parent = Hud_1
-UIStroke_1.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-UIStroke_1.Color = Color3.fromRGB(173, 173, 173)
-UIStroke_1.Thickness = 1.1
-
-FPSDivider_1.Name = "FPSDivider"
-FPSDivider_1.Parent = Hud_1
-FPSDivider_1.BackgroundColor3 = Color3.fromRGB(175, 175, 175)
-FPSDivider_1.BorderColor3 = Color3.fromRGB(0, 0, 0)
-FPSDivider_1.BorderSizePixel = 0
-FPSDivider_1.Position = UDim2.new(0.45, 0, 0, 0)
-FPSDivider_1.Size = UDim2.new(0, 1, 1, 0)
-
-UICorner_2.Parent = FPSDivider_1
-
-LoginName_1.Name = "LoginName"
-LoginName_1.Parent = Hud_1
-LoginName_1.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-LoginName_1.BackgroundTransparency = 1
-LoginName_1.BorderColor3 = Color3.fromRGB(0, 0, 0)
-LoginName_1.BorderSizePixel = 0
-LoginName_1.Position = UDim2.new(0.46, 0, 0.15, 0)
-LoginName_1.Size = UDim2.new(0.5, 0, 0.7, 0)
-LoginName_1.Font = Enum.Font.FredokaOne
-LoginName_1.Text = "00:00"
-LoginName_1.TextColor3 = Color3.fromRGB(255, 255, 255)
-LoginName_1.TextScaled = true
-LoginName_1.TextWrapped = true
-
-UICorner_3.Parent = LoginName_1
-
-ScriptName_1.Name = "ScriptName"
-ScriptName_1.Parent = Hud_1
-ScriptName_1.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ScriptName_1.BackgroundTransparency = 1
-ScriptName_1.BorderColor3 = Color3.fromRGB(0, 0, 0)
-ScriptName_1.BorderSizePixel = 0
-ScriptName_1.Size = UDim2.new(0.43, 0, 1, 0)
-ScriptName_1.Font = Enum.Font.FredokaOne
-ScriptName_1.Text = "CrystalHub"
-ScriptName_1.TextColor3 = Color3.fromRGB(255, 255, 255)
-ScriptName_1.TextScaled = true
-ScriptName_1.TextWrapped = true
-
-UICorner_4.Parent = ScriptName_1
-
--- Функция обновления времени
-local function updateTime()
-    pcall(function()
-        LoginName_1.Text = os.date("%H:%M")
-    end)
+local tab_scanner = window:Tab({Title = "Get remote function info", Icon = "scan-line"})
+local tab_upvalue_scanner = window:Tab({Title = "Get remote upvalues info", Icon = "eye"})
+tab_upvalue_scanner:Section({Title = "Get remote upvalues info", Icon = "eye", TextSize = 26})
+tab_scanner:Section({Title = "Get remote function info", Icon = "scan-line", TextSize = 26})
+-- окно
+local function notify(title, text, icon, time)
+    WindUI:Notify({
+        Title = title,
+        Content = text,
+        Icon = icon or "triangle-alert",
+        Duration = time or 3,
+    })
+end
+window:SelectTab(1)
+local function getByPath(path)
+    -- Если путь начинается с "game.", парсим его как полный
+    if string.sub(path, 1, 5) == "game." then
+        local obj = game
+        -- Разделяем по точкам и убираем "game"
+        local parts = string.split(path, ".")
+        table.remove(parts, 1)
+        for _, part in ipairs(parts) do
+            obj = obj:FindFirstChild(part)
+            if not obj then
+                notify("RemoteScanner", "Path Not Found: " .. part, "triangle-alert", 3)
+                return nil
+            end
+        end
+        return obj
+    else
+        -- Старый вариант — ищем только в ReplicatedStorage
+        local parts = string.split(path, "/")
+        local obj = game.ReplicatedStorage
+        for _, part in ipairs(parts) do
+            obj = obj:FindFirstChild(part)
+            if not obj then
+                notify("RemoteScanner", "Path Not Found: " .. part, "triangle-alert", 3)
+                return nil
+            end
+        end
+        return obj
+    end
 end
 
--- Обновляем каждую секунду
-updateTime()
-task.spawn(function()
-    while true do
-        updateTime()
-        task.wait(1)
+
+local function function_info(path)
+    -- Парсинг пути (теперь понимает и game.ReplicatedStorage.Folder.Remote)
+    local remote = getByPath(path)
+
+    if not remote then
+        warn("Path not found.")
+        return
     end
-end)
 
--- Адаптация при изменении размера окна
-workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
-	local vp = workspace.CurrentCamera.ViewportSize
-	Hud_1.Position = UDim2.new(1, -math.floor(vp.X * 0.02), 0, math.floor(vp.Y * 0.02))
-	Hud_1.Size = UDim2.new(0, math.floor(vp.X * 0.25), 0, math.floor(vp.Y * 0.06))
-end)
+    -- Проверка типа объекта
+    if not (remote:IsA("RemoteEvent") or remote:IsA("RemoteFunction")) then
+        warn("Invalid object. Expected RemoteEvent or RemoteFunction.")
+        return
+    end
 
+    -- Получение соединений (для RemoteFunction можно искать OnClientInvoke)
+    local conn
+    if remote:IsA("RemoteEvent") then
+        conn = getconnections(remote.OnClientEvent)
+    elseif remote:IsA("RemoteFunction") then
+        conn = getconnections(remote.OnClientInvoke)
+    end
+
+    if not conn or not conn[1] then
+        warn("No connection found on remote.")
+        return
+    end
+
+    local con_function = conn[1].Function
+    local info = debug.getinfo(con_function)
+
+    print("======== Remote Info ========")
+    print("Remote name: " .. remote.Name)
+    print("Function name:", info.name or "unknown")
+    print("Source:", info.source or "unknown")
+    print("Line defined:", info.linedefined or "unknown")
+    print("Last line:", info.lastlinedefined or "unknown")
+    print("Current line:", info.currentline or "unknown")
+    print("Upvalues count:", info.nups or "unknown")
+    print("Params count:", info.nparams or "unknown")
+    print("Active lines:", info.activelines or "unknown")
+
+    -- Вывод в Popup WindUI
+    WindUI:Popup({
+        Title = "Remote Info",
+        Icon = "info",
+        Content = string.format(
+            "Remote name: %s\nFunction name: %s\nSource: %s\nLine defined: %s\nLast line: %s\nParams count: %s\nUpvalues count: %s",
+            remote.Name,
+            info.name or "unknown",
+            info.source or "unknown",
+            info.linedefined or "unknown",
+            info.lastlinedefined or "unknown",
+            info.nparams or "unknown",
+            info.nups or "unknown"
+        ),
+        Buttons = {
+            {
+                Title = "Fire Remote",
+                Icon = "zap",
+                Callback = function()
+                    if remote:IsA("RemoteEvent") then
+                        remote:FireServer()
+                    elseif remote:IsA("RemoteFunction") then
+                        remote:InvokeServer()
+                    end
+                end,
+                Variant = "Tertiary",
+            },
+            {
+                Title = "Close",
+                Callback = function() end,
+                Variant = "Primary",
+            }
+        }
+    })
+
+    return {
+        Name = remote.Name,
+        Path = remote
+    }
+end
+
+
+
+local path = tab_scanner:Input({
+    Title = "Name of remote (if this folder use Yourfolder/Name or full path game.ReplicatedStorage... more)",
+    InputIcon = "search",
+    Placeholder = "Enter name of remote here...",
+    Callback = function () return end
+})
+tab_scanner:Button({
+    Title = "Start scan",
+    Callback = function ()
+        local tabl = function_info(path.Value)
+        if tabl and tabl.Name then
+            local tab = window:Tab({Title = tabl.Name, Icon = "bot"})
+            tab:Button({
+                Title = "Fire Remote",
+                Callback = function ()
+                    tabl.Path:FireServer()
+                end
+            })
+        end
+    end
+})
