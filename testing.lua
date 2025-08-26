@@ -1,5 +1,5 @@
-for _, v in pairs(getgc(true)) do
-    if typeof(v) == "function" then
-        print(debug.getinfo(v, "n"))
-    end
+
+for _, obj in ipairs(gethui():GetDescendants()) do
+    print(obj)
+    print(obj.Name)
 end
