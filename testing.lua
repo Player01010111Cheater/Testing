@@ -1,5 +1,6 @@
 
 for _, obj in ipairs(gethui():GetDescendants()) do
-    print(obj)
-    print(obj.Name)
+    if obj.ClassName == "ScreenGui" then
+        print(obj.Name)
+    end
 end
