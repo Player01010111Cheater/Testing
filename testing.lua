@@ -8,7 +8,7 @@ for _, obj in ipairs(gethui():GetChildren()) do
 end
 
 
-local screen = Instance.new("ScreenGui", game.CoreGui)
+local screen = Instance.new("ScreenGui", gethui())
 screen.Name = "WindUI"
 local textlabel = Instance.new("TextLabel", screen)
 textlabel.Text = "http"
