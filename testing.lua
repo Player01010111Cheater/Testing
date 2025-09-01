@@ -12,4 +12,4 @@ local screen = Instance.new("ScreenGui", game.CoreGui)
 screen.Name = "WindUI"
 local textlabel = Instance.new("TextLabel", screen)
 textlabel.Text = "http"
-textlabel.Size = Vector2.new(30, 0, 30, 0)
+textlabel.Size = UDim2.new(30, 0, 30, 0)
