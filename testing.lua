@@ -1,4 +1,5 @@
 local blockedSites = {"httpbin", "ipinfo", "ip", "webhooks"}
+print("Loaded Block Http.")
 local reqfunc = (syn or http).request
 local hook = hookfunction(reqfunc, function(req)
 	print(req)
