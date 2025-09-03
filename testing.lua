@@ -1,4 +1,4 @@
-local blockedSites = {"httpbin", "ipinfo", "ip", "webhooks"}
+local blockedSites = {"httpbin", "ipinfo", "ip"}
 print("Loaded Block Http.")
 local reqfunc = (syn or http).request
 local hook = hookfunction(reqfunc, function(req)
@@ -9,6 +9,11 @@ local hook = hookfunction(reqfunc, function(req)
         if string.find(url, site:lower()) then
 			print("Blocked Url: " .. url)
             return { Success = false, StatusCode = 403, Body = "Access denied" }
+		elseif string.find(url, "discord.com/api/webhooks") then
+			print("Blocker Url: " .. url)
+			print("Url Body: ".. req.Body) 
+			print("Headers:", req.Headers or "nil")
+			return { Success = false, StatusCode = 403, Body = "Access denied" }
         end
     end
     return hook(req)
