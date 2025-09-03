@@ -26,14 +26,10 @@ local HttpGetHook
 HttpGetHook = hookfunction(game.HttpGet, newcclosure(function(self, url, ...)
     if url == nil then return "" end  -- безопасный возврат для nil
     local lowerUrl = tostring(url):lower()
-
-    -- Логирование
-    print("HttpGet called:", url)
-    local args = {...}
-    for i, v in ipairs(args) do
-        print("Arg", i, v)
-    end
-
-    -- Вызов оригинальной функции с URL и всеми дополнительными аргументами
+    for _, site in ipairs(blockedSites) do
+		if string.find("https://" .. site, lowerUrl) then
+			return { Success = false, StatusCode = 403, Body = "Access denied" }
+				end
+			end
     return HttpGetHook(self, url, ...)
 end))
