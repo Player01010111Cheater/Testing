@@ -25,14 +25,6 @@ print("Connected: game.HttpGet")
 
 hookfunction(originalHttpGet, function(self, url, ...)
     local lowerUrl = tostring(url):lower()
-    
-    for _, site in ipairs(blockedSites) do
-        if string.find(lowerUrl, site:lower()) and not string.find(lowerUrl, "https://raw.github") and string.find(lowerUrl, "https://pastefy.app") then
-            print("Blocked url: " .. url)
-            return { Body = 'print("hello world")', StatusCode = 403, Success = false }
-        end
-    end
-    
     local args = {...}
     print("Arguments passed to originalHttpGet:", args) -- Отладочный вывод
     if select("#", ...) > 0 then
