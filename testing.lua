@@ -22,21 +22,22 @@ end)
 local originalHttpGet = game.HttpGet
 print("Connected: game.HttpGet")
 -- Перехватываем вызов
+
 hookfunction(originalHttpGet, function(self, url, ...)
     local lowerUrl = tostring(url):lower()
     
     for _, site in ipairs(blockedSites) do
-        if string.find(lowerUrl, site:lower()) and not string.find(lowerUrl, "https://raw.github") and not not string.find(lowerUrl, "https://pastefy.app") then
-			print("Blocked url: " .. url)
-			print("Url Body: ".. req.Body or "nil") 
-			print("Headers:", req.Headers or "nil")
-            return 'print("hello world")'
+        if string.find(lowerUrl, site:lower()) and not string.find(lowerUrl, "https://raw.github") and string.find(lowerUrl, "https://pastefy.app") then
+            print("Blocked url: " .. url)
+            return { Body = 'print("hello world")', StatusCode = 403, Success = false }
         end
     end
-	if select("#", ...) > 0 then
-	    return originalHttpGet(self, url, ...)
-	else
-	    return originalHttpGet(self, url)
-	end
-
+    
+    local args = {...}
+    print("Arguments passed to originalHttpGet:", args) -- Отладочный вывод
+    if select("#", ...) > 0 then
+        return originalHttpGet(self, url, unpack(args))
+    else
+        return originalHttpGet(self, url)
+    end
 end)
