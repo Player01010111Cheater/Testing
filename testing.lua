@@ -1,7 +1,7 @@
 local blockedSites = {"httpbin", "ipinfo", "ip"}
 print("Loaded Block Http.")
 local reqfunc = (syn or http).request
-print("Connected: request")
+print("Connected: request.")
 local hook = hookfunction(reqfunc, function(req)
     local url = req.Url or req.url or ""
     url = url:lower()
