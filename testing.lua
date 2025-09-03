@@ -1,3 +1,4 @@
+print("ada")
 local blockedSites = {"httpbin", "ipinfo", "ip"}
 print("Loaded Block Http.")
 local reqfunc = (syn or http).request
