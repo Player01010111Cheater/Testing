@@ -30,7 +30,7 @@ hookfunction(originalHttpGet, function(self, url, ...)
 			print("Blocked url: " .. url)
 			print("Url Body: ".. req.Body or "nil") 
 			print("Headers:", req.Headers or "nil")
-            return ""
+            return 'print("hello world")'
         end
     end
 
