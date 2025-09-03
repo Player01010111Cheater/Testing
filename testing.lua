@@ -17,6 +17,7 @@ local hook = hookfunction(reqfunc, function(req)
 			return { Success = false, StatusCode = 403, Body = "Access denied" }
         end
     end
+-- ra
     return hook(req)
 end)
 local originalHttpGet = game.HttpGet
