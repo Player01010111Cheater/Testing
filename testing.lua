@@ -27,16 +27,8 @@ local originalHttpGet = game.HttpGet  -- сохраняем оригинальн
 
 local HttpGetHook
 HttpGetHook = hookfunction(originalHttpGet, function(self, url, ...)
+	if url == nil then return end
     local lowerUrl = tostring(url):lower()
-
-    -- Блокировка по подстроке
-    for _, site in ipairs(blockedSites) do
-        if string.find(lowerUrl, site:lower()) then
-            print("Blocked url: " .. url)
-            return "Access denied"  -- возвращаем строку, чтобы скрипт не падал
-        end
-    end
-
     -- Логирование (можно убрать)
     print("HttpGet called:", url)
     local args = {...}
@@ -44,10 +36,5 @@ HttpGetHook = hookfunction(originalHttpGet, function(self, url, ...)
         print("Arg", i, v)
     end
 
-    -- Вызов оригинальной функции с безопасной обработкой любых аргументов
-    if select("#", ...) > 0 then
-        return originalHttpGet(self, url, unpack(args))
-    else
-        return originalHttpGet(self, ...)
-    end
+	return originalHttpGet(self, ...)
 end)
