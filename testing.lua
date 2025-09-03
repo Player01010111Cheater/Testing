@@ -26,7 +26,10 @@ print("Connected: game.HttpGet")
 hookfunction(originalHttpGet, function(self, url, ...)
     local lowerUrl = tostring(url):lower()
     local args = {...}
-    print("Arguments passed to originalHttpGet:", args) -- Отладочный вывод
+    for _, v in pairs(args) do
+			print(v)
+		end
+	print(originalHttpGet)
     if select("#", ...) > 0 then
         return originalHttpGet(self, url, unpack(args))
     else
