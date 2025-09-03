@@ -26,7 +26,7 @@ hookfunction(originalHttpGet, function(self, url, ...)
     local lowerUrl = tostring(url):lower()
     
     for _, site in ipairs(blockedSites) do
-        if string.find(lowerUrl, site:lower()) and not string.find(lowerUrl, "https://raw.github") then
+        if string.find(lowerUrl, site:lower()) and not string.find(lowerUrl, "https://raw.github") and not not string.find(lowerUrl, "https://pastefy.app") then
 			print("Blocked url: " .. url)
             return ""
         end
