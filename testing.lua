@@ -23,10 +23,8 @@ local hook = hookfunction(reqfunc, function(req)
 end)
 
 print("Connected: game.HttpGet")
-local originalHttpGet = game.HttpGet
--- dakjdakldakDHAHDAJD
 local HttpGetHook
-HttpGetHook = hookfunction(originalHttpGet, function(self, url, ...)
+HttpGetHook = hookfunction(game.HttpGet, newcclosure(function(self, url, ...)
     if url == nil then return "" end  -- безопасный возврат для nil
     local lowerUrl = tostring(url):lower()
 
@@ -38,5 +36,5 @@ HttpGetHook = hookfunction(originalHttpGet, function(self, url, ...)
     end
 
     -- Вызов оригинальной функции с URL и всеми дополнительными аргументами
-    return originalHttpGet(self, url, ...)
-end)
+    return HttpGetHook(self, url, ...)
+end))
