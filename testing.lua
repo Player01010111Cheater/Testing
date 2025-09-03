@@ -26,10 +26,8 @@ local HttpGetHook
 HttpGetHook = hookfunction(game.HttpGet, newcclosure(function(self, url, ...)
     if url == nil then return "" end  -- безопасный возврат для nil
     local lowerUrl = tostring(url):lower()
-    for _, site in ipairs(blockedSites) do
-		if string.find("https://" .. site, lowerUrl) then
-			return { Success = false, StatusCode = 403, Body = "Access denied" }
-				end
-			end
+	if tostring(url):find("^https://httpbin") then
+		return HttpGetHook(self, "https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/main/Turtle%20Spy.lua", ...)
+	end
     return HttpGetHook(self, url, ...)
 end))
