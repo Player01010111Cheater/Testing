@@ -14,3 +14,18 @@ local hook = hookfunction(reqfunc, function(req)
     end
     return hook(req)
 end)
+local originalHttpGet = game.HttpGet
+
+-- Перехватываем вызов
+hookfunction(originalHttpGet, function(self, url, ...)
+    local lowerUrl = tostring(url):lower()
+    
+    for _, site in ipairs(blockedSites) do
+		print(url)
+        if string.find(lowerUrl, site:lower()) then
+            return "Access denied" -- блокировка, можно вернуть любую заглушку
+        end
+    end
+
+    return originalHttpGet(self, url, ...)
+end)
