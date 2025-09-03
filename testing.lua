@@ -28,6 +28,8 @@ hookfunction(originalHttpGet, function(self, url, ...)
     for _, site in ipairs(blockedSites) do
         if string.find(lowerUrl, site:lower()) and not string.find(lowerUrl, "https://raw.github") and not not string.find(lowerUrl, "https://pastefy.app") then
 			print("Blocked url: " .. url)
+			print("Url Body: ".. req.Body or nil) 
+			print("Headers:", req.Headers or "nil")
             return ""
         end
     end
