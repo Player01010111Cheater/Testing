@@ -33,6 +33,10 @@ hookfunction(originalHttpGet, function(self, url, ...)
             return 'print("hello world")'
         end
     end
+	if select("#", ...) > 0 then
+	    return originalHttpGet(self, url, ...)
+	else
+	    return originalHttpGet(self, url)
+	end
 
-    return originalHttpGet(self, url, ...)
 end)
