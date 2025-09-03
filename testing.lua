@@ -25,9 +25,5 @@ print("Connected: game.HttpGet")
 local HttpGetHook
 HttpGetHook = hookfunction(game.HttpGet, newcclosure(function(self, url, ...)
     if url == nil then return "" end  -- безопасный возврат для nil
-    local lowerUrl = tostring(url):lower()
-	if tostring(url):find("^https://httpbin") then
-		return HttpGetHook(self, "https://raw.githubusercontent.com/ltseverydayyou/uuuuuuu/main/Turtle%20Spy.lua", ...)
-	end
     return HttpGetHook(self, url, ...)
 end))
