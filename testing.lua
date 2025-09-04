@@ -39,3 +39,11 @@ oldHttpGet = hookfunction(game.HttpGet, newcclosure(function (self, url, ...)
     return oldHttpGet(self, url , ...)
 end))
 
+local text = "https://scriptblox ipython ip test"
+
+for _, site in ipairs(blockedSites) do
+    local pattern = "([^%w])" .. site
+    if string.find(text, pattern) or string.sub(text, 1, #site) == site then
+        print(site .. " найдено")
+    end
+end
