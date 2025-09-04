@@ -1,4 +1,4 @@
-local blockedSites = {"httpbin.", "ipinfo.", "ipify."}
+local blockedSites = {"httpbin", "ipinfo", "ipify"}
 local library = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 local function notify(text)
     library:Notify({
@@ -27,11 +27,15 @@ end))
 
 local oldHttpGet
 oldHttpGet = hookfunction(game.HttpGet, newcclosure(function(self, url, ...)
-    for _, site in pairs(blockedSites) do
-        if string.match(url:lower(), "^" .. site:lower()) then
-            warn("[BLOCKED HTTPGET] " .. url)
-            notify("[BLOCKED HTTPGET] " .. url)
-            return "Access denied"
+    local prefixes = {"https://", "http://"}
+    for _, prefix in pairs(prefixes) do
+        for _, site in pairs(blockedSites) do
+            -- Проверяем, начинается ли url с prefix и содержит ли site после prefix
+            if url:lower():sub(1, #prefix) == prefix and string.match(url:lower(), "^" .. prefix .. site:lower()) then
+                warn("[BLOCKED HTTPGET] " .. url)
+                notify("[BLOCKED HTTPGET] " .. url)
+                return "Access denied"
+            end
         end
     end
     return oldHttpGet(self, url, ...)
