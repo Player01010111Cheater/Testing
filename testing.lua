@@ -2,7 +2,7 @@ local blockedSites = {"httpbin.org", "ipinfo.io"}
 local library = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 local function notify(text)
     library:Notify({
-        Title = "Blocker",
+        Title = "Http Blocker",
         Content = text,
         Icon = "info",
         Duration = 3,
@@ -16,6 +16,7 @@ oldRequestGet = hookfunction(request, newcclosure(function (req)
     for _, site in pairs(blockedSites) do
         if string.find(url, site:lower(), 1, true) then
             warn("[BLOCKED REQUEST] " .. url)
+            notify("[BLOCKED REQUEST] " .. url)
             return { Success = false, StatusCode = 403, Body = "Access denied" }
         end
     end
@@ -29,15 +30,10 @@ oldHttpGet = hookfunction(game.HttpGet, newcclosure(function (self, url, ...)
     for _, site in pairs(blockedSites) do
         if string.find(url, site:lower(), 1 , true) then
             warn("[BLOCKED HTTPGET] " .. url)
+            notify("[BLOCKED HTTPGET] " .. url)
             return "Access denied"
         end
     end
     return oldHttpGet(self, url , ...)
 end))
-
-
-hookfunction(game.Players.LocalPlayer.Kick, function(self, message)
-    print(string.format("Сообщение: %s", tostring(message or "Без сообщения")))
-    return
-end)
 
