@@ -26,15 +26,13 @@ end))
 
 
 local oldHttpGet
-oldHttpGet = hookfunction(game.HttpGet, newcclosure(function (self, url, ...)
+oldHttpGet = hookfunction(game.HttpGet, newcclosure(function(self, url, ...)
     for _, site in pairs(blockedSites) do
-        if string.find(url, site:lower(), 1 , true) then
+        if string.match(url:lower(), "^" .. site:lower()) then
             warn("[BLOCKED HTTPGET] " .. url)
             notify("[BLOCKED HTTPGET] " .. url)
             return "Access denied"
         end
     end
-    return oldHttpGet(self, url , ...)
+    return oldHttpGet(self, url, ...)
 end))
-
-
