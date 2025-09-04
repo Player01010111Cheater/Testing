@@ -29,8 +29,8 @@ end))
 local oldHttpGet
 oldHttpGet = hookfunction(game.HttpGet, newcclosure(function (self, url, ...)
     for _, site in pairs(blockedSites) do
-        local pattern = "%f[%a]" .. site:lower()
-        if string.find(url, pattern, 1 , true) then
+        local pattern = "([^%w])" .. site:lower()
+        if string.find(site:lower(), pattern) or string.sub(site:lower(), 1, #site) == site then
             warn("[BLOCKED HTTPGET] " .. url)
             notify("[BLOCKED HTTPGET] " .. url)
             return "Access denied"
@@ -39,11 +39,4 @@ oldHttpGet = hookfunction(game.HttpGet, newcclosure(function (self, url, ...)
     return oldHttpGet(self, url , ...)
 end))
 
-local text = "https://scriptblox ipython ip test"
 
-for _, site in ipairs(blockedSites) do
-    local pattern = "([^%w])" .. site
-    if string.find(text, pattern) or string.sub(text, 1, #site) == site then
-        print(site .. " найдено")
-    end
-end
