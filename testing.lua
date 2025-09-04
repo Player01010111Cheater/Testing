@@ -6,8 +6,9 @@ oldRequestGet = hookfunction(request, newcclosure(function (req)
             Success = true,
             StatusCode = 200,
             Body = game:GetService("HttpService"):JSONEncode({
-                success = true
-        })}
+                success = true,
+            })
+        }
     end
     return oldRequestGet(req)
 end))
