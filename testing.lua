@@ -1,29 +1,27 @@
 local blockedSites = {"httpbin", "ipinfo", "ip"}
-print("Loaded Block Http.")
-local reqfunc = (syn or http).request
-print("Connected: request.")
-local hook = hookfunction(reqfunc, function(req)
-    local url = req.Url or req.url or ""
-    url = url:lower()
-    for _, site in ipairs(blockedSites) do
-		print(url)
-        if string.find(url, site:lower()) then
-			print("Blocked Url: " .. url)
+
+local oldRequestGet
+oldRequestGet = hookfunction(request, newcclosure(function (req)
+    local url = (req.Url or req.url or ""):lower()
+
+    for _, site in pairs(blockedSites) do
+        if string.find(url, site:lower(), 1, true) then
+            warn("[BLOCKED REQUEST] " .. url)
             return { Success = false, StatusCode = 403, Body = "Access denied" }
-		elseif string.find(url, "discord.com/api/webhooks") then
-			print("Blocker Url: " .. url)
-			print("Url Body: ".. req.Body) 
-			print("Headers:", req.Headers or "nil")
-			return { Success = false, StatusCode = 403, Body = "Access denied" }
         end
     end
--- ra
-    return hook(req)
-end)
 
-print("Connected: game.HttpGet")
-local HttpGetHook
-HttpGetHook = hookfunction(game.HttpGet, newcclosure(function(self, url, ...)
-    if url == nil then return "" end  -- безопасный возврат для nil
-    return HttpGetHook(self, url, ...)
+    return oldRequestGet(req)
+end))
+
+
+local oldHttpGet
+oldHttpGet = hookfunction(game.HttpGet, newcclosure(function (self, url, ...)
+    for _, site in pairs(blockedSites) do
+        if string.find(url, site:lower(), 1 , true) then
+            warn("[BLOCKED HTTPGET] " .. url)
+            return "Access denied"
+        end
+    end
+    return oldHttpGet(self, url , ...)
 end))
