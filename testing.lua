@@ -1,40 +1,16 @@
-local blockedSites = {"httpbin", "ipinfo", "ipify"}
-local library = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
-local function notify(text)
-    library:Notify({
-        Title = "Http Blocker",
-        Content = text,
-        Icon = "info",
-        Duration = 3,
-    }) 
-end
-
 local oldRequestGet
 oldRequestGet = hookfunction(request, newcclosure(function (req)
     local url = (req.Url or req.url or ""):lower()
-
-    for _, site in pairs(blockedSites) do
-        if string.find(url, site:lower(), 1, true) then
-            warn("[BLOCKED REQUEST] " .. url)
-            notify("[BLOCKED REQUEST] " .. url)
-            return { Success = false, StatusCode = 403, Body = "Access denied" }
-        end
+    if string.find(url, "https://neoxsoftworks.eu") then
+        print("[DEBUG] KeySystem Hooked")
+        return {
+            Success = true, -- исправлено
+            StatusCode = 200,
+            Body = game:GetService("HttpService"):JSONEncode({
+                valid = true,
+            })
+        }
     end
-
     return oldRequestGet(req)
 end))
-
-
-local oldHttpGet
-oldHttpGet = hookfunction(game.HttpGet, newcclosure(function (self, url, ...)
-    for _, site in pairs(blockedSites) do
-        if string.find(url, site:lower(), 1 , true) then
-            warn("[BLOCKED HTTPGET] " .. url)
-            notify("[BLOCKED HTTPGET] " .. url)
-            return "Access denied"
-        end
-    end
-    return oldHttpGet(self, url , ...)
-end))
-
 
