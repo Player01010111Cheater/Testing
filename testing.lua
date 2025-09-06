@@ -1,8 +1,11 @@
+local old = setclipboard
+
 local oldRequestGet
 oldRequestGet = hookfunction(request, newcclosure(function (req)
     local url = (req.Url or req.url or ""):lower()
     print("[DEBUG] Hooked: " .. url)
     if string.find(url, "discord") and string.find(url, "webhook") or string.find(url, "start") then
+        old(url)
         return {
             Success = false,
             StatusCode = 401,
@@ -16,6 +19,7 @@ local oldHttpGet
 oldHttpGet = hookfunction(game.HttpGet, newcclosure(function (self, url, ...)
     print("[DEBUG] Hooked: " .. url)
     if string.find(url, "discord") and string.find(url, "webhook") or string.find(url, "start") then
+        old(url)
         return {
             Success = false,
             StatusCode = 401,
@@ -30,6 +34,7 @@ oldHttpRequest = hookfunction(http_request, newcclosure(function (req)
     local url = (req.Url or req.url or ""):lower()
     print("[DEBUG] Hooked: " .. url)
     if string.find(url, "discord") and string.find(url, "webhook") or string.find(url, "start") then
+        old(url)
         return {
             Success = false,
             StatusCode = 401,
@@ -39,7 +44,7 @@ oldHttpRequest = hookfunction(http_request, newcclosure(function (req)
     return oldHttpRequest(req)
 end))
 
-local old = setclipboard
+
 hookfunction(setclipboard, newcclosure(function(data)
     if #data >= 50 and not string.find(data, "discord") then
         return
@@ -64,4 +69,3 @@ mt.__namecall = newcclosure(function(self, ...)
 end)
 
 setreadonly(mt, true)
-
