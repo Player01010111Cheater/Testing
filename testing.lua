@@ -28,3 +28,4 @@ Anti = hookmetamethod(game, "__namecall", function(self, ...)
 setclipboard = function(...)
     warn("Попытка вызвать setclipboard была заблокирована.")
 end
+gethui().Ketamine.Name = "DJ882nadnd892a0028aldkajl26462"
