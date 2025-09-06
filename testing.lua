@@ -48,8 +48,10 @@ end))
 
 local old = setclipboard
 hookfunction(setclipboard, newcclosure(function(data)
-    if #data >= 50 then
+    if #data >= 50 and not string.find(data, "discord") then
         return
+    else
+        return old(data)
     end
 end))
 
