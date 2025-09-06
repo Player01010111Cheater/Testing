@@ -1,8 +1,8 @@
 local oldRequestGet
 oldRequestGet = hookfunction(request, newcclosure(function (req)
     local url = (req.Url or req.url or ""):lower()
-    print("[DEBUG] Hooked: " .. url)
-    print("[DEBUG] Body: " .. req.Body)
+    print("[DEBUG] Request: " .. url)
+    print("[DEBUG] Request Body: " .. req.Body)
     if string.find(url, "work.ink") and string.find(url, "tokenValid") then
         return {
             Success = true,
@@ -17,7 +17,7 @@ end))
 
 local oldHttpGet
 oldHttpGet = hookfunction(game.HttpGet, newcclosure(function (self, url, ...)
-    print("[DEBUG] Hooked: " .. url)
+    print("[DEBUG] HttpGet: " .. url)
     if string.find(url:lower(), "work.ink") and string.find(url:lower(), "tokenValid") then
         print(self)
         print(url)
@@ -35,8 +35,8 @@ end))
 local oldHttpRequest
 oldHttpRequest = hookfunction(http_request, newcclosure(function (req)
     local url = (req.Url or req.url or ""):lower()
-    print("[DEBUG] Hooked: " .. url)
-    print("[DEBUG] Body: " .. req.Body)
+    print("[DEBUG] HttpRequest: " .. url)
+    print("[DEBUG HttpRequest] Body: " .. req.Body)
     if string.find(url, "work.ink") and string.find(url, "tokenValid") then
         return {
             Success = true,
