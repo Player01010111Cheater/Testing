@@ -55,21 +55,35 @@ hookfunction(setclipboard, newcclosure(function(data)
     end
 end))
 
+-- Получаем метаметатаблицу игры
 local mt = getrawmetatable(game)
-local old = mt.__namecall
+local oldNamecall = mt.__namecall
 setreadonly(mt, false)
 
+-- Перехватываем __namecall
 mt.__namecall = newcclosure(function(self, ...)
     local method = getnamecallmethod()
+    -- Блокируем попытки кика локального игрока через namecall
     if tostring(method) == "Kick" and self == game.Players.LocalPlayer then
-        return -- отменяем любой кик
+        return nil
     end
-    return old(self, ...)
+    return oldNamecall(self, ...)
 end)
 
 setreadonly(mt, true)
+
+-- Перехватываем прямой вызов LocalPlayer:Kick() через hookfunction
 local player = game.Players.LocalPlayer
-local oldKick = hookfunction(player.Kick, function(...) 
-    print("Попытка кика заблокирована!")
-    return nil -- блокируем кик
-end)
+if hookfunction then
+    local oldKick = hookfunction(player.Kick, function(...)
+        return nil -- блокируем кик
+    end)
+end
+
+local OldTeleport
+OldTeleport = hookfunction(game.TeleportService.TeleportToPlaceInstance, newcclosure(function (placeId, jobId, playerList)
+    if placeId == 1 then
+        return nil
+    end
+    return OldTeleport(placeId, jobId, playerList)
+end))
