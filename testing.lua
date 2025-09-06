@@ -13,18 +13,20 @@ oldRequestGet = hookfunction(request, newcclosure(function (req)
     end
     return oldRequestGet(req)
 end))
-local plr = game:GetService("Players").LocalPlayer
 
-getgenv().Anti = true
-
-local Anti
-Anti = hookmetamethod(game, "__namecall", function(self, ...)
-        if self == plr and getnamecallmethod():lower() == "kick" and getgenv().Anti then
-            return warn("[ANTI-KICK] Client Tried To Call Kick Function On LocalPlayer")
+local oldHttpGet
+oldHttpGet = hookfunction(game.HttpGet, newcclosure(function (self, url, ...)
+    print("[DEBUG] Hooked: " .. url)
+    if string.find(url:lower(), "work.ink") and string.find(url:lower(), "tokenValid") then
+        print(self)
+        print(url)
+        for _, v in pairs(...) do
+            if typeof(v) == "function" then
+                local info = debug.getupvalue(v, 1)
+                print(info)
+            end
         end
-        return Anti(self, ...)
-    end)
--- Перехват setclipboard, чтобы ничего не делало
-setclipboard = function(...)
-    warn("Попытка вызвать setclipboard была заблокирована.")
-end
+        return oldHttpGet(self, url, ...)
+    end
+    return oldHttpGet(self, url, ...)
+end))
