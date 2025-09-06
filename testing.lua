@@ -1,3 +1,4 @@
+print("sex with your mom XDDD")
 -- Функция для разбивки строки и вывода на части
 local function printSplit(str)
     local mid = math.floor(#str / 2)
