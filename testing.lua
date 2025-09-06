@@ -1,5 +1,4 @@
 print("Cracker V2.0")
-print("By Admin")
 local function printSplit(str)
     local mid = math.floor(#str / 2)
     local part1 = string.sub(str, 1, mid)
@@ -81,10 +80,6 @@ if hookfunction then
 end
 
 local OldTeleport
-OldTeleport = hookfunction(game.TeleportService.TeleportToPlaceInstance, newcclosure(function (placeId, jobId, playerList)
-    print("Connected TeleportService" .. placeId)
-    if placeId == 1 then
-        return nil
-    end
-    return OldTeleport(placeId, jobId, playerList)
+OldTeleport = hookfunction(game.ShutDown, newcclosure(function ()
+    return nil
 end))
