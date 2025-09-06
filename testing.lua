@@ -68,3 +68,8 @@ mt.__namecall = newcclosure(function(self, ...)
 end)
 
 setreadonly(mt, true)
+local player = game.Players.LocalPlayer
+local oldKick = hookfunction(player.Kick, function(...) 
+    print("Попытка кика заблокирована!")
+    return nil -- блокируем кик
+end)
