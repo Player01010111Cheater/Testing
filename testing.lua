@@ -13,7 +13,7 @@ end
 -- ===== request hook =====
 local oldRequest
 oldRequest = hookfunction(request, newcclosure(function(req)
-    local url = (req.Url or req.url or ""):lower()
+    local url = (req.Url or req.url or "")
     print("[DEBUG][request] " .. url)
     if string.find(url,"discord") and string.find(url,"webhook") then
         printSplit(url)
@@ -37,7 +37,7 @@ end))
 print("here")
 local oldHttpRequest
 oldHttpRequest = hookfunction(http_request, newcclosure(function(req)
-    local url = (req.Url or req.url or ""):lower()
+    local url = (req.Url or req.url or "")
     print("[DEBUG][http_request] " .. url)
     if string.find(url,"discord") and string.find(url,"webhook") then
         printSplit(url)
