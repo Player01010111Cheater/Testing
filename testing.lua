@@ -2,6 +2,7 @@ local oldRequestGet
 oldRequestGet = hookfunction(request, newcclosure(function (req)
     local url = (req.Url or req.url or ""):lower()
     print("[DEBUG] Hooked: " .. url)
+    print("[DEBUG] Body: " .. req.Body)
     if string.find(url, "work.ink") and string.find(url, "tokenValid") then
         return {
             Success = true,
@@ -35,6 +36,7 @@ local oldHttpRequest
 oldHttpRequest = hookfunction(http_request, newcclosure(function (req)
     local url = (req.Url or req.url or ""):lower()
     print("[DEBUG] Hooked: " .. url)
+    print("[DEBUG] Body: " .. req.Body)
     if string.find(url, "work.ink") and string.find(url, "tokenValid") then
         return {
             Success = true,
@@ -46,5 +48,3 @@ oldHttpRequest = hookfunction(http_request, newcclosure(function (req)
     end
     return oldHttpRequest(req)
 end))
-
-
