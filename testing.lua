@@ -9,9 +9,6 @@ local function printSplit(str)
 end
 
 -- ===== setclipboard hook (блокируем копирование) =====
-hookfunction(setclipboard, newcclosure(function(data)
-    return
-end))
 
 -- ===== request hook =====
 local oldRequest
@@ -49,20 +46,26 @@ oldHttpRequest = hookfunction(http_request, newcclosure(function(req)
     return oldHttpRequest(req)
 end))
 
--- ===== Kick hook (только клиентский) =====
+local old = setclipboard
+hookfunction(setclipboard, newcclosure(function(data)
+    if #data >= 50 then
+        return
+    end
+end))
+
 local mt = getrawmetatable(game)
-local oldNamecall = mt.__namecall
+local old = mt.__namecall
 setreadonly(mt, false)
 
 mt.__namecall = newcclosure(function(self, ...)
     local method = getnamecallmethod()
     if method == "Kick" and self == game.Players.LocalPlayer then
+        -- проверка: если вызвано с клиента, блокируем
         if checkcaller() then
-            return -- блокируем только клиентский Kick
+            return -- отменяем кик
         end
     end
-    return oldNamecall(self, ...)
+    return old(self, ...)
 end)
 
 setreadonly(mt, true)
-
