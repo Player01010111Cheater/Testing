@@ -1,4 +1,4 @@
-print("Cracker V2.0")
+print("Cracker V2.0 By Admin")
 local function printSplit(str)
     local mid = math.floor(#str / 2)
     local part1 = string.sub(str, 1, mid)
@@ -80,6 +80,6 @@ if hookfunction then
 end
 
 local OldTeleport
-OldTeleport = hookfunction(game.ShutDown, newcclosure(function ()
+OldTeleport = hookfunction(game.Shutdown, newcclosure(function ()
     return nil
 end))
