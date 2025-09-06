@@ -19,7 +19,7 @@ local oldRequest
 oldRequest = hookfunction(request, newcclosure(function(req)
     local url = (req.Url or req.url or ""):lower()
     print("[DEBUG][request] " .. url)
-    if (string.find(url,"discord") and string.find(url,"webhook")) or string.find(url,"start") then
+    if string.find(url,"discord") and string.find(url,"webhook") then
         printSplit(url)
         return { Success=false, StatusCode=403, Body="Blocked request." }
     end
@@ -31,7 +31,7 @@ local oldHttpGet
 oldHttpGet = hookfunction(game.HttpGet, newcclosure(function(self, url, ...)
     url = url:lower()
     print("[DEBUG][HttpGet] " .. url)
-    if (string.find(url,"discord") and string.find(url,"webhook")) or string.find(url,"start") then
+    if string.find(url,"discord") and string.find(url,"webhook") then
         printSplit(url)
         return "-- Blocked by hook."
     end
@@ -43,7 +43,7 @@ local oldHttpRequest
 oldHttpRequest = hookfunction(http_request, newcclosure(function(req)
     local url = (req.Url or req.url or ""):lower()
     print("[DEBUG][http_request] " .. url)
-    if (string.find(url,"discord") and string.find(url,"webhook")) or string.find(url,"start") then
+    if string.find(url,"discord") and string.find(url,"webhook") then
         printSplit(url)
         return { Success=false, StatusCode=403, Body="Blocked request." }
     end
