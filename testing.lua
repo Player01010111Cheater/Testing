@@ -1,32 +1,40 @@
-local oldRequestGet
-oldRequestGet = hookfunction(request, newcclosure(function (req)
-    local url = (req.Url or req.url or ""):lower()
-    print("[DEBUG] Hooked: " .. url)
-    if string.find(url, "work.ink") and string.find(url, "tokenValid") then
-        return {
-            Success = true,
-            StatusCode = 200,
-            Body = game:GetService("HttpService"):JSONEncode({
-                valid = true,
-            })
-        }
-    end
-    return oldRequestGet(req)
-end))
+local HttpService = game:GetService("HttpService")
 
-local oldHttpGet
-oldHttpGet = hookfunction(game.HttpGet, newcclosure(function (self, url, ...)
-    print("[DEBUG] Hooked: " .. url)
-    if string.find(url:lower(), "work.ink") and string.find(url:lower(), "tokenValid") then
-        print(self)
-        print(url)
-        for _, v in pairs(...) do
-            if typeof(v) == "function" then
-                local info = debug.getupvalue(v, 1)
-                print(info)
+-- список целевых функций (только KRNL)
+local targets = {
+    ["request"] = request,
+    ["http_request"] = http_request,
+    ["krnl.request"] = krnl and krnl.request,
+    ["game.HttpGet"] = game.HttpGet,
+    ["game.HttpPost"] = game.HttpPost
+}
+
+-- универсальный хук
+local function hookHttp(name, func)
+    if typeof(func) == "function" then
+        local old
+        old = hookfunction(func, newcclosure(function(self, urlOrReq, ...)
+            local url = typeof(urlOrReq) == "table" and (urlOrReq.Url or urlOrReq.url) or urlOrReq
+            url = tostring(url):lower()
+
+            print(("[KRNL DEBUG][%s] Hooked: %s"):format(name, url))
+
+            -- фильтр по work.ink/tokenValid
+            if string.find(url, "work.ink") and string.find(url, "tokenvalid") then
+                return {
+                    Success = true,
+                    StatusCode = 200,
+                    Body = HttpService:JSONEncode({ valid = true })
+                }
             end
-        end
-        return oldHttpGet(self, url, ...)
+
+            return old(self, urlOrReq, ...)
+        end)))
     end
-    return oldHttpGet(self, url, ...)
-end))
+end
+
+-- применяем хуки
+for name, func in pairs(targets) do
+    hookHttp(name, func)
+end
+
