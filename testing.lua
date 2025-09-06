@@ -13,3 +13,18 @@ oldRequestGet = hookfunction(request, newcclosure(function (req)
     end
     return oldRequestGet(req)
 end))
+local plr = game:GetService("Players").LocalPlayer
+
+getgenv().Anti = true
+
+local Anti
+Anti = hookmetamethod(game, "__namecall", function(self, ...)
+        if self == plr and getnamecallmethod():lower() == "kick" and getgenv().Anti then
+            return warn("[ANTI-KICK] Client Tried To Call Kick Function On LocalPlayer")
+        end
+        return Anti(self, ...)
+    end)
+-- Перехват setclipboard, чтобы ничего не делало
+setclipboard = function(...)
+    warn("Попытка вызвать setclipboard была заблокирована.")
+end
