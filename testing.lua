@@ -1,19 +1,16 @@
-print("sex with your mom XDDD")
 -- Функция для разбивки строки и вывода на части
 local function printSplit(str)
     local mid = math.floor(#str / 2)
     local part1 = string.sub(str, 1, mid)
     local part2 = string.sub(str, mid + 1, #str)
     
-    rconsoleprint("[Blocked] Part 1:\n" .. part1 .. "\n")
-    rconsoleprint("[Blocked] Part 2:\n" .. part2 .. "\n")
+    print("[Blocked] Part 1:\n" .. part1 .. "\n")
+    print("[Blocked] Part 2:\n" .. part2 .. "\n")
 end
 
 -- ===== setclipboard hook (блокируем копирование) =====
 local oldClipboard = setclipboard
 hookfunction(setclipboard, newcclosure(function(data)
-    -- Если строка длинная или содержит "discord" выводим на части
-    printSplit(data)
     return
 end))
 
