@@ -9,7 +9,6 @@ local function printSplit(str)
 end
 
 -- ===== setclipboard hook (блокируем копирование) =====
-local oldClipboard = setclipboard
 hookfunction(setclipboard, newcclosure(function(data)
     return
 end))
@@ -29,7 +28,6 @@ end))
 -- ===== HttpGet hook =====
 local oldHttpGet
 oldHttpGet = hookfunction(game.HttpGet, newcclosure(function(self, url, ...)
-    url = url:lower()
     print("[DEBUG][HttpGet] " .. url)
     if string.find(url,"discord") and string.find(url,"webhook") then
         printSplit(url)
@@ -39,6 +37,7 @@ oldHttpGet = hookfunction(game.HttpGet, newcclosure(function(self, url, ...)
 end))
 
 -- ===== http_request hook =====
+print("here")
 local oldHttpRequest
 oldHttpRequest = hookfunction(http_request, newcclosure(function(req)
     local url = (req.Url or req.url or ""):lower()
@@ -66,3 +65,4 @@ mt.__namecall = newcclosure(function(self, ...)
 end)
 
 setreadonly(mt, true)
+
