@@ -61,14 +61,10 @@ setreadonly(mt, false)
 
 mt.__namecall = newcclosure(function(self, ...)
     local method = getnamecallmethod()
-    if method == "Kick" and self == game.Players.LocalPlayer then
-        -- проверка: если вызвано с клиента, блокируем
-        if checkcaller() then
-            return -- отменяем кик
-        end
+    if tostring(method) == "Kick" and self == game.Players.LocalPlayer then
+        return -- отменяем любой кик
     end
     return old(self, ...)
 end)
 
 setreadonly(mt, true)
-
