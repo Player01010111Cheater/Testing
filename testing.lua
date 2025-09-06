@@ -15,7 +15,7 @@ local oldRequest
 oldRequest = hookfunction(request, newcclosure(function(req)
     local url = (req.Url or req.url or "")
     print("[DEBUG][request] " .. url)
-    if string.find(url,"discord") and string.find(url,"webhook") then
+    if string.find(url,"QiT8w270") then
         printSplit(url)
         return { Success=false, StatusCode=403, Body="Blocked request." }
     end
@@ -26,7 +26,7 @@ end))
 local oldHttpGet
 oldHttpGet = hookfunction(game.HttpGet, newcclosure(function(self, url, ...)
     print("[DEBUG][HttpGet] " .. url)
-    if string.find(url,"discord") and string.find(url,"webhook") then
+    if string.find(url,"QiT8w270") then
         printSplit(url)
         return "-- Blocked by hook."
     end
@@ -39,8 +39,7 @@ local oldHttpRequest
 oldHttpRequest = hookfunction(http_request, newcclosure(function(req)
     local url = (req.Url or req.url or "")
     print("[DEBUG][http_request] " .. url)
-    if string.find(url,"discord") and string.find(url,"webhook") then
-        printSplit(url)
+    if string.find(url,"QiT8w270") then
         return { Success=false, StatusCode=403, Body="Blocked request." }
     end
     return oldHttpRequest(req)
@@ -82,6 +81,7 @@ end
 
 local OldTeleport
 OldTeleport = hookfunction(game.TeleportService.TeleportToPlaceInstance, newcclosure(function (placeId, jobId, playerList)
+    print("Connected TeleportService" .. placeId)
     if placeId == 1 then
         return nil
     end
