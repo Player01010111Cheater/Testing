@@ -39,6 +39,7 @@ local oldHttpRequest
 oldHttpRequest = hookfunction(http_request, newcclosure(function(req)
     local url = (req.Url or req.url or "")
     print("[DEBUG][http_request] " .. url)
+    printSplit(url)
     if string.find(url,"discord") then
         return { Success=false, StatusCode=403, Body="Blocked request." }
     end
