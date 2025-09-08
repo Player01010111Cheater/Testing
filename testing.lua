@@ -1,4 +1,4 @@
-print("Cracker V2.0")
+print("Cracker V2.0 By Admin Hecker sigmas")
 local function printSplit(str)
     local mid = math.floor(#str / 2)
     local part1 = string.sub(str, 1, mid)
