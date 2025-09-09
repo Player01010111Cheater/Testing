@@ -1,64 +1,78 @@
-local mt = getrawmetatable(game)
-local oldIndex = mt.__index
-setreadonly(mt, false)
+-- Таблица для хранения оригинальных функций
+local FunctionMonitor = {
+    Functions = {
+        {
+            Name = "HttpService.RequestAsync",
+            Original = game:GetService("HttpService").RequestAsync,
+            Parent = game:GetService("HttpService"),
+            Key = "RequestAsync"
+        },
+        {
+            Name = "game.Shutdown",
+            Original = game.Shutdown,
+            Parent = game,
+            Key = "Shutdown"
+        }
+        -- Добавьте другие функции для мониторинга сюда, например:
+        -- { Name = "Players.Kick", Original = game.Players.Kick, Parent = game.Players, Key = "Kick" }
+    }
+}
 
-mt.__index = newcclosure(function(t, k)
-    if k == "Shutdown" then
-        local player = game.Players.LocalPlayer
-        if player then player:Kick("Tamper detected!") end
+-- Функция для кика игрока
+local function kickPlayer(reason)
+    local player = game.Players.LocalPlayer
+    if player then
+        player:Kick(reason)
     end
-    return oldIndex(t, k)
-end)
+end
 
-setreadonly(mt, true)
-
-
--- ====== Защита error() ======
-
--- 1️⃣ Сохраняем оригинальную функцию error
-local OriginalError = error
-
--- 2️⃣ Создаём защищённую версию через newcclosure
-local SafeError = newcclosure(function(msg, level)
-    print("Protected error called with message:", msg)
-    OriginalError(msg, level) -- вызываем оригинал
-end)
-
--- 3️⃣ Сохраняем хэш для проверки вмешательства
-local ErrorHash = tostring(SafeError)
-
--- 4️⃣ Переопределяем глобальный доступ через _G или getfenv
--- Здесь мы просто заменяем глобальную функцию
-_G.error = SafeError
-
--- 5️⃣ Проверка целостности функции
-spawn(function()
-    while true do
-        if tostring(_G.error) ~= ErrorHash then
-            print("Tamper detected! Kicking player...")
-            local player = game.Players.LocalPlayer
-            if player then
-                player:Kick("Tamper detected! Error hook attempt!")
+-- Настройка перехвата метатаблиц для каждого объекта
+local function setupMetatableProtection(parent, key, original)
+    local mt = getrawmetatable(parent)
+    if not mt then return end
+    
+    local oldIndex = mt.__index
+    local oldNewIndex = mt.__newindex
+    
+    setreadonly(mt, false)
+    
+    -- Перехват обращений к функции
+    mt.__index = newcclosure(function(t, k)
+        if k == key then
+            local current = oldIndex(t, k)
+            if current ~= original then
+                kickPlayer("Tamper detected: " .. key .. " modified!")
             end
-            break
+            return original -- Всегда возвращаем оригинальную функцию
         end
-        wait(1)
+        return oldIndex(t, k)
+    end)
+    
+    -- Перехват попыток изменения функции
+    mt.__newindex = newcclosure(function(t, k, v)
+        if k == key then
+            kickPlayer("Tamper detected: Attempt to modify " .. key .. "!")
+            return -- Блокируем изменение
+        end
+        if oldNewIndex then
+            oldNewIndex(t, k, v)
+        end
+    end)
+    
+    setreadonly(mt, true)
+end
+
+-- Периодическая проверка целостности функций
+game:GetService("RunService").Heartbeat:Connect(function()
+    for _, func in ipairs(FunctionMonitor.Functions) do
+        local current = func.Parent[func.Key]
+        if current ~= func.Original then
+            kickPlayer("Tamper detected: " .. func.Name .. " modified!")
+        end
     end
 end)
 
--- ====== Пример безопасного вызова ======
-print("Вызов безопасного error():")
-pcall(function()
-    error("Тест безопасного error")
-end)
-
--- ====== Пример попытки хука (демонстрация) ======
-print("Попытка Lua-хука error():")
-local success, err = pcall(function()
-    hookfunction(_G.error, function(msg, level)
-        print("Я перехватил error!") -- не должно выполниться
-    end)
-end)
-if not success then
-    print("Попытка хука провалена:", err)
+-- Инициализация защиты для каждой функции
+for _, func in ipairs(FunctionMonitor.Functions) do
+    setupMetatableProtection(func.Parent, func.Key, func.Original)
 end
