@@ -42,10 +42,6 @@ spawn(function()
     end
 end)
 
--- ====== Пример безопасного вызова ======
-print("Вызов безопасного Shutdown:")
-game:Shutdown() -- вызовет SafeShutdown
-
 -- ====== Пример попытки хука (демонстрация) ======
 print("Попытка хука Shutdown:")
 local success, err = pcall(function()
