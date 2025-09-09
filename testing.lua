@@ -1,15 +1,15 @@
--- ====== Защита Shutdown ======
+-- ====== Защита game:Shutdown() ======
 
--- 1️⃣ Сохраняем оригинальный Shutdown
+-- 1️⃣ Сохраняем оригинальный метод
 local OriginalShutdown = game.Shutdown
 
--- 2️⃣ Создаём защищённую версию через newcclosure
-local SafeShutdown = newcclosure(function(...)
+-- 2️⃣ Создаём защищённый метод через newcclosure
+local SafeShutdown = newcclosure(function(self, ...)
     print("Protected Shutdown called")
-    OriginalShutdown(...) -- оригинальная логика Shutdown
+    OriginalShutdown(self, ...) -- вызываем оригинальный метод
 end)
 
--- 3️⃣ Сохраняем хэш для проверки вмешательств
+-- 3️⃣ Сохраняем хэш для проверки вмешательства
 local ShutdownHash = tostring(SafeShutdown)
 
 -- 4️⃣ Переопределяем доступ через метатаблицу
@@ -30,7 +30,6 @@ setreadonly(mt, true)
 spawn(function()
     while true do
         if tostring(SafeShutdown) ~= ShutdownHash then
-            -- Кто-то пытался хукнуть или изменить функцию
             print("Tamper detected! Kicking player...")
             local player = game.Players.LocalPlayer
             if player then
@@ -42,18 +41,18 @@ spawn(function()
     end
 end)
 
--- ====== Пример использования ======
--- Любые вызовы через game.Shutdown() будут использовать защищённую версию
+-- ====== Пример безопасного вызова ======
 print("Вызов безопасного Shutdown:")
-game.Shutdown() -- вызовет SafeShutdown
+game:Shutdown() -- вызовет SafeShutdown
 
--- ====== Пример попытки хука (демонстрация защиты) ======
+-- ====== Пример попытки хука (демонстрация) ======
 print("Попытка хука Shutdown:")
 local success, err = pcall(function()
-    hookfunction(game.Shutdown, function()
+    hookfunction(game.Shutdown, function(self, ...)
         print("Я перехватил Shutdown!") -- это не должно выполниться
     end)
 end)
 if not success then
     print("Попытка хука провалена:", err)
 end
+
