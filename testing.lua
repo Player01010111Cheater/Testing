@@ -1,55 +1,33 @@
-print("Protecting setclipboard from hookfunction...")
+local function protectFunction(funcName)
+    local original = getgenv()[funcName]
+    if not original then return end
 
--- Сохраняем оригинал в нескольких местах
-local OriginalSetClipboard = setclipboard
-local _BACKUP_REF = setclipboard
-
--- Создаем нашу защищенную функцию
-local function ProtectedSetClipboard(text)
-    print("Clipboard set (protected):", text)
-    return OriginalSetClipboard(text)
-end
-
--- Применяем защиту через hookfunction ПЕРВЫМ
-if hookfunction then
-    -- Мы сами хукаем функцию чтобы защитить ее
-    local SecureHook = hookfunction(OriginalSetClipboard, function(...)
-        print("Clipboard call intercepted:", ...)
-        return OriginalSetClipboard(...)
+    getgenv()[funcName] = newcclosure(function(...)
+        print(string.format("[%s] called with:", funcName), ...)
+        return original(...)
     end)
-    
-    getgenv().setclipboard = SecureHook
-else
-    getgenv().setclipboard = ProtectedSetClipboard
+
+    -- Защита от изменений
+    debug.setmetatable(getgenv()[funcName], {
+        __newindex = function() error("protected") end
+    })
+
+    -- Мониторинг
+    task.spawn(function()
+        local secureRef = getgenv()[funcName]
+        while task.wait(0.5) do
+            if getgenv()[funcName] ~= secureRef then
+                warn("FUNCTION TAMPER DETECTED:", funcName)
+                game.Players.LocalPlayer:Kick("Security violation")
+                break
+            end
+        end
+    end)
 end
 
--- Система обнаружения хуков через детектор изменений
-task.spawn(function()
-    local lastHash = tostring(OriginalSetClipboard):sub(1, 50)
-    
-    while task.wait(0.3) do
-        -- Проверяем не был ли hookfunction применен к оригиналу
-        local currentHash = tostring(OriginalSetClipboard):sub(1, 50)
-        
-        if currentHash ~= lastHash then
-            warn("HOOKFUNCTION DETECTED! Hash changed")
-            local player = game.Players.LocalPlayer
-            if player then
-                player:Kick("Memory tampering detected!")
-            end
-            break
-        end
-        
-        -- Дополнительная проверка через тестовый вызов
-        local success, result = pcall(function()
-            return debug.info(OriginalSetClipboard, "s")
-        end)
-        
-        if not success then
-            warn("Function integrity compromised")
-            break
-        end
-    end
-end)
+-- Защищаем функции
+protectFunction("setclipboard")
+protectFunction("request")
+protectFunction("hookfunction")
 
-print("Advanced protection active!")
+print("Basic function protection activated!")
