@@ -1,35 +1,36 @@
--- Сохраняем оригинальный warn
+-- Сохраняем оригинальные функции
 local raw_warn = warn
+local raw_print = print
+local raw_error = error
 
--- Таблица для хранения локальных ссылок на "чистые" функции
+-- Таблица локальных копий
 local safe_funcs = {
     warn = raw_warn,
-    print = print,
-    error = error,
+    print = raw_print,
+    error = raw_error,
 }
 
--- Обёртка для warn
+-- Функция безопасного warn
 local function safe_warn(msg)
-    -- Проверка, что глобальный warn не был заменён
+    -- Если глобальный warn был заменён, используем локальный raw_warn
     if warn ~= safe_funcs.warn then
-        -- Ловушка: сразу аварийно выводим сообщение и прекращаем работу
-        safe_funcs.warn("Hook detected on warn! Exiting...")
-        return
+        safe_funcs.warn("Hook detected on warn! Using safe version.")
     end
 
-    -- Вызов оригинального warn через локальную ссылку
     safe_funcs.warn(msg)
 end
 
--- Переназначаем глобальный warn в своём скрипте
+-- Переопределяем глобальный warn
 warn = safe_warn
 
--- Периодическая проверка глобальных функций
+-- Циклическая проверка глобальных функций
 task.spawn(function()
     while true do
-        for k, v in pairs(safe_funcs) do
-            if _G[k] ~= v then
-                v("Hook detected on "..k.."!")
+        for name, func in pairs(safe_funcs) do
+            -- Проверяем глобальную переменную и _G
+            local global_func = rawget(_G, name)
+            if global_func ~= func then
+                func("Hook detected on "..name.."! Using safe version.")
             end
         end
         task.wait(0.5)
@@ -38,3 +39,4 @@ end)
 
 -- Пример использования
 warn("Это сообщение через безопасный warn")
+
