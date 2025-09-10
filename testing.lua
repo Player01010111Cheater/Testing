@@ -1,18 +1,10 @@
-local originalError = error
-local safeError = function(message, level)
-    if _G.error ~= originalError then
-        warn("Обнаружена подмена функции error!")
-        return
-    end
-    originalError(message, level)
-end
-_G.error = safeError
+-- Сохраняем оригинальную функцию
+local original_error = error
 
-setmetatable(_G, {
-    __newindex = function(t, k, v)
-        if k == "error" then
-            warn("Попытка изменить функцию error!")
-        end
-        rawset(t, k, v)
-    end
-})
+-- Создаем защищенную обертку
+error = newcclosure(function(...)
+    return original_error(...)
+end)
+
+-- Пример использования
+error("Защищенная ошибка!")
