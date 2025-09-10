@@ -44,7 +44,8 @@ end)
 -- ====== Демонстрация защиты ======
 print("Попытка хука Shutdown:")
 local success, err = pcall(function()
-    hookfunction(game.Shutdown, function()
+    local old
+    old = hookfunction(game.Shutdown, function()
         return nil
     end)
 end)
