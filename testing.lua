@@ -1,7 +1,6 @@
 -- Хранит оригинальные функции для мониторинга
 local FunctionMonitor = {
     Functions = {
-        {Name = "HttpService.RequestAsync", Original = game:GetService("HttpService").RequestAsync, Parent = game:GetService("HttpService"), Key = "RequestAsync"},
         {Name = "game.Shutdown", Original = game.Shutdown, Parent = game, Key = "Shutdown"}
     }
 }
