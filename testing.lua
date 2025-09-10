@@ -1,3 +1,4 @@
+-- простая контрольная сумма
 local function checksum(str)
     local sum = 0
     for i = 1, #str do
@@ -6,13 +7,13 @@ local function checksum(str)
     return sum
 end
 
-local raw_error = warn
-local hash_error = checksum(string.dump(raw_error))
-print(hash_error)
+local raw_warn = warn -- сохраняем оригинал
+local hash_warn = checksum(tostring(raw_warn))
+
 task.spawn(function()
     while true do
-        if checksum(string.dump(error)) ~= hash_error then
-            raw_error("hook detected")
+        if checksum(tostring(warn)) ~= hash_warn then
+            raw_warn("hook detected") -- срабатывает при hookfunction
         end
         task.wait(1)
     end
