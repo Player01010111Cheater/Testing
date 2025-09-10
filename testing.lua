@@ -7,7 +7,7 @@ local function checksum(str)
     return sum
 end
 
-local raw_warn = warn -- сохраняем оригинал
+local raw_warn = newcclosure(warn) -- сохраняем оригинал
 local hash_warn = checksum(tostring(raw_warn))
 print(hash_warn)
 task.spawn(function()
