@@ -1,47 +1,53 @@
-print("GANDON PLAYING..,..")
+local functions = {
+    {
+        Object = game,
+        Key = "Shutdown",
+        Original = game.Shutdown
+    }
+}
 
--- ====== Защита game:Shutdown() ======
-local OriginalShutdown = game.Shutdown
-
--- Создаём защищённый метод
-local SafeShutdown = newcclosure(function(...)
-    print("Protected Shutdown called")
-    return OriginalShutdown(...)
-end)
-
--- Переопределяем доступ через метатаблицу
-local mt = getrawmetatable(game)
-if mt then
-    local oldIndex = mt.__index
-    setreadonly(mt, false)
-    
-    mt.__index = newcclosure(function(t, k)
-        if k == "Shutdown" then
-            return SafeShutdown
-        end
-        return oldIndex(t, k)
+for _, v in pairs(functions) do
+    v.SafeVersion = newcclosure(function (...)
+        return v.Original(...)        
     end)
-    
-    setreadonly(mt, true)
 end
 
--- Проверка целостности функции
+-- ====== Переопределяем доступ через метатаблицы ======
+for _, func in ipairs(functions) do
+    local mt = getrawmetatable(func.Object)
+    if mt then
+        local oldIndex = mt.__index
+        setreadonly(mt, false)
+        
+        mt.__index = newcclosure(function(t, k)
+            if k == func.Key then
+                return func.SafeVersion
+            end
+            return oldIndex(t, k)
+        end)
+        
+        setreadonly(mt, true)
+    end
+end
+
+-- ====== Проверка целостности всех функций ======
 spawn(function()
     while true do
-        -- Правильное сравнение функций, а не их строковых представлений
-        if game.Shutdown ~= SafeShutdown then
-            print("Tamper detected! Kicking player...")
-            local player = game.Players.LocalPlayer
-            if player then
-                player:Kick("Tamper detected! Shutdown hook attempt!")
+        for _, func in ipairs(functions) do
+            -- Проверяем, не изменили ли оригинальную функцию
+            if func.Object[func.Key] ~= func.SafeVersion then
+                local player = game.Players.LocalPlayer
+                if player then
+                    player:Kick("Tamper detected! " .. func.Key .. " hook attempt!")
+                end
+                return
             end
-            break
         end
         wait(1)
     end
 end)
 
--- ====== Демонстрация защиты ======
+
 print("Попытка хука Shutdown:")
 local success, err = pcall(function()
     local old
