@@ -8,7 +8,7 @@ end
 
 local raw_error = warn
 local hash_error = checksum(string.dump(raw_error))
-
+print(hash_error)
 task.spawn(function()
     while true do
         if checksum(string.dump(error)) ~= hash_error then
