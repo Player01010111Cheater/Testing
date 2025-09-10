@@ -9,7 +9,7 @@ end
 
 local raw_warn = warn -- сохраняем оригинал
 local hash_warn = checksum(tostring(raw_warn))
-
+print(hash_warn)
 task.spawn(function()
     while true do
         if checksum(tostring(warn)) ~= hash_warn then
