@@ -1,57 +1,37 @@
-local functions = {
-    {
-        Object = game,
-        Key = "Shutdown",
-        Original = game.Shutdown
-    }
-}
+print("Protecting setclipboard...")
 
-for _, v in pairs(functions) do
-    v.SafeVersion = newcclosure(function (...)
-        return v.Original(...)        
-    end)
-end
+-- Оригинал
+local OriginalSetClipboard = setclipboard
 
--- ====== Переопределяем доступ через метатаблицы ======
-for _, func in ipairs(functions) do
-    local mt = getrawmetatable(func.Object)
-    if mt then
-        local oldIndex = mt.__index
-        setreadonly(mt, false)
-        
-        mt.__index = newcclosure(function(t, k)
-            if k == func.Key then
-                return func.SafeVersion
-            end
-            return oldIndex(t, k)
-        end)
-        
-        setreadonly(mt, true)
-    end
-end
+-- Защищённая функция
+local SafeSetClipboard = newcclosure(function(text)
+    print("Clipboard set:", text)
+    return OriginalSetClipboard(text)
+end)
 
--- ====== Проверка целостности всех функций ======
+-- Подменяем глобал
+getgenv().setclipboard = SafeSetClipboard
+
+-- Мониторинг (сторож)
 spawn(function()
     while true do
-        for _, func in ipairs(functions) do
-            -- Проверяем, не изменили ли оригинальную функцию
-            if func.Object[func.Key] ~= func.SafeVersion then
-                local player = game.Players.LocalPlayer
-                if player then
-                    player:Kick("Tamper detected! " .. func.Key .. " hook attempt!")
-                end
-                return
+        if setclipboard ~= SafeSetClipboard then
+            warn("Tamper detected on setclipboard!")
+            local player = game.Players.LocalPlayer
+            if player then
+                player:Kick("Tamper detected! Clipboard hook attempt!")
             end
+            break
         end
         wait(1)
     end
 end)
 
 
-print("Попытка хука Shutdown:")
+print("Попытка хука Shwn:")
 local success, err = pcall(function()
     local old
-    old = hookfunction(game.Shutdown, function()
+    old = hookfunction(setclipboard, function()
         return nil
     end)
 end)
