@@ -1,33 +1,109 @@
-local function protectFunction(funcName)
-    local original = getgenv()[funcName]
-    if not original then return end
+local FunctionProtector = {}
+FunctionProtector.__index = FunctionProtector
 
-    getgenv()[funcName] = newcclosure(function(...)
-        print(string.format("[%s] called with:", funcName), ...)
-        return original(...)
-    end)
+-- Создаем защищенную среду
+local SecureEnvironment = {}
+debug.setmetatable(SecureEnvironment, {
+    __newindex = function(_, key, value)
+        if key == "setclipboard" or key == "request" or key == "hookfunction" then
+            warn("BLOCKED: Attempt to modify " .. key)
+            return -- Блокируем изменение
+        end
+        rawset(SecureEnvironment, key, value)
+    end
+})
 
-    -- Защита от изменений
-    debug.setmetatable(getgenv()[funcName], {
-        __newindex = function() error("protected") end
+function FunctionProtector.new(targetFunction, functionName)
+    local self = setmetatable({}, FunctionProtector)
+    
+    self.original = targetFunction
+    self.name = functionName or "unknown"
+    self.callCount = 0
+    self.lastCall = 0
+    
+    -- Создаем защищенную функцию
+    self.secureFunction = function(...)
+        self.callCount += 1
+        self.lastCall = tick()
+        
+        -- Логирование вызовов
+        print(string.format("[%s] Call #%d: %s", 
+            self.name, self.callCount, tostring(...)))
+        
+        return self.original(...)
+    end
+    
+    -- Делаем функцию неизменяемой
+    debug.setmetatable(self.secureFunction, {
+        __newindex = function() error("Function is protected") end,
+        __metatable = "locked"
     })
+    
+    return self
+end
 
-    -- Мониторинг
+function FunctionProtector:protect()
+    -- Заменяем глобальную функцию
+    rawset(getgenv(), self.name, self.secureFunction)
+    self:startGuard()
+end
+
+function FunctionProtector:startGuard()
     task.spawn(function()
-        local secureRef = getgenv()[funcName]
-        while task.wait(0.5) do
-            if getgenv()[funcName] ~= secureRef then
-                warn("FUNCTION TAMPER DETECTED:", funcName)
-                game.Players.LocalPlayer:Kick("Security violation")
-                break
+        local originalHash = tostring(self.original):sub(1, 30)
+        local secureHash = tostring(self.secureFunction):sub(1, 30)
+        
+        while task.wait(0.3) do
+            -- Проверка 1: Сравнение ссылок
+            if getgenv()[self.name] ~= self.secureFunction then
+                self:detectTamper("Reference mismatch")
+            end
+            
+            -- Проверка 2: Целостность оригинальной функции
+            if tostring(self.original):sub(1, 30) ~= originalHash then
+                self:detectTamper("Original function modified")
+            end
+            
+            -- Проверка 3: Детектор hookfunction
+            local success, info = pcall(function()
+                return debug.info(self.original, "n")
+            end)
+            
+            if not success then
+                self:detectTamper("Function integrity compromised")
             end
         end
     end)
 end
 
--- Защищаем функции
-protectFunction("setclipboard")
-protectFunction("request")
-protectFunction("hookfunction")
+function FunctionProtector:detectTamper(reason)
+    warn(string.format("TAMPER DETECTED [%s]: %s", self.name, reason))
+    
+    local player = game.Players.LocalPlayer
+    if player then
+        player:Kick(string.format("Security violation: %s tampered", self.name))
+    end
+    
+    error("Security violation", 2)
+end
 
-print("Basic function protection activated!")
+-- Защита от hookfunction
+if hookfunction then
+    local originalHook = hookfunction
+    hookfunction = function(target, hook)
+        if target == setclipboard or target == request then
+            warn("BLOCKED: hookfunction attempt on protected function")
+            return target
+        end
+        return originalHook(target, hook)
+    end
+end
+
+-- Использование:
+local clipboardProtector = FunctionProtector.new(setclipboard, "setclipboard")
+clipboardProtector:protect()
+
+local requestProtector = FunctionProtector.new(request, "request") 
+requestProtector:protect()
+
+print("Function protection system activated!")
