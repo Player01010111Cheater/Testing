@@ -1,35 +1,55 @@
-print("Advanced clipboard protection...")
+print("Protecting setclipboard from hookfunction...")
 
-local _ORIGINAL = setclipboard
-local _CALLS = 0
+-- Сохраняем оригинал в нескольких местах
+local OriginalSetClipboard = setclipboard
+local _BACKUP_REF = setclipboard
 
--- Полный контроль над всеми вызовами
-getgenv().setclipboard = newcclosure(function(text)
-    _CALLS += 1
+-- Создаем нашу защищенную функцию
+local function ProtectedSetClipboard(text)
+    print("Clipboard set (protected):", text)
+    return OriginalSetClipboard(text)
+end
+
+-- Применяем защиту через hookfunction ПЕРВЫМ
+if hookfunction then
+    -- Мы сами хукаем функцию чтобы защитить ее
+    local SecureHook = hookfunction(OriginalSetClipboard, function(...)
+        print("Clipboard call intercepted:", ...)
+        return OriginalSetClipboard(...)
+    end)
     
-    -- Логируем все вызовы
-    print(string.format("Clipboard call #%d: %s", _CALLS, text))
+    getgenv().setclipboard = SecureHook
+else
+    getgenv().setclipboard = ProtectedSetClipboard
+end
+
+-- Система обнаружения хуков через детектор изменений
+task.spawn(function()
+    local lastHash = tostring(OriginalSetClipboard):sub(1, 50)
     
-    -- Можно добавить фильтрацию
-    if text:find("malicious") then
-        warn("Blocked malicious clipboard content!")
-        return
+    while task.wait(0.3) do
+        -- Проверяем не был ли hookfunction применен к оригиналу
+        local currentHash = tostring(OriginalSetClipboard):sub(1, 50)
+        
+        if currentHash ~= lastHash then
+            warn("HOOKFUNCTION DETECTED! Hash changed")
+            local player = game.Players.LocalPlayer
+            if player then
+                player:Kick("Memory tampering detected!")
+            end
+            break
+        end
+        
+        -- Дополнительная проверка через тестовый вызов
+        local success, result = pcall(function()
+            return debug.info(OriginalSetClipboard, "s")
+        end)
+        
+        if not success then
+            warn("Function integrity compromised")
+            break
+        end
     end
-    
-    -- Вызываем оригинал
-    return _ORIGINAL(text)
 end)
 
--- Защита от удаления/замены
-local SECURE_ENV = getgenv()
-debug.setmetatable(SECURE_ENV, {
-    __newindex = function(t, k, v)
-        if k == "setclipboard" then
-            warn("Clipboard protection: Modification blocked!")
-            return
-        end
-        rawset(t, k, v)
-    end
-})
-
-print("Clipboard protection active!")
+print("Advanced protection active!")
