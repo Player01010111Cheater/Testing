@@ -1,24 +1,22 @@
 print("Protecting setclipboard...")
 
-print("Protecting setclipboard...")
-
--- Берём то, что реально есть у экзекутора (даже если уже обёрнуто)
-local CurrentClipboard = setclipboard
+-- Сохраняем оригинальную функцию ДО любых манипуляций
+local OriginalSetClipboard = setclipboard
 
 -- Делаем защищённую версию
 local SafeSetClipboard = newcclosure(function(text)
     print("Clipboard set:", text)
-    return CurrentClipboard(text)
+    return OriginalSetClipboard(text)
 end)
 
 -- Подменяем глобал
 rawset(getgenv(), "setclipboard", SafeSetClipboard)
 
--- Сторож
+-- Сторож - проверяем через оригинальную ссылку
 task.spawn(function()
     while task.wait(1) do
-        -- Проверяем только на нашу обёртку
-        if setclipboard ~= SafeSetClipboard then
+        -- Правильная проверка: сравниваем с ожидаемой защищённой функцией
+        if getgenv().setclipboard ~= SafeSetClipboard then
             warn("Tamper detected on setclipboard!")
             local player = game.Players.LocalPlayer
             if player then
