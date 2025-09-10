@@ -1,4 +1,4 @@
-print("GANDON PLAYING..,..")
+print("GANDON PLAYING..,12..")
 
 -- ====== Список защищаемых функций ======
 local ProtectedFunctions = {
