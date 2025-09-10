@@ -28,14 +28,3 @@ spawn(function()
 end)
 
 
-print("Попытка хука Shwn:")
-local success, err = pcall(function()
-    local old
-    old = hookfunction(setclipboard, function()
-        return nil
-    end)
-end)
-
-if not success then
-    print("Попытка хука провалена:", err)
-end
